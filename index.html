@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Loan Club — Simple Loans, Fast Decisions</title>
+  <title>Loan Club — Apply (Wizard fixed)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css">
-  <meta name="description" content="Loan Club — fast, transparent loans. Apply in a few steps and track status from your dashboard.">
+  <link rel="stylesheet" href="/styles.css" />
+  <meta name="description" content="Loan Club — wizard application (one-by-one)"/>
 </head>
 <body>
-  <!-- Top bar (minimal) -->
+  <!-- Top bar -->
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
@@ -25,36 +25,34 @@
     </div>
   </header>
 
-  <!-- Main hero -->
+  <!-- Hero -->
   <main class="hero-wrap">
     <div class="hero-card">
       <div class="hero-left">
-        <h1 class="hero-title">Get money when it matters — clear terms, quick review.</h1>
-        <p class="hero-lead">Flat <strong>10% APR</strong> (simple interest) — competitive, transparent pricing. Apply in a few quick steps and track your application anytime.</p>
-
+        <h1 class="hero-title">Get funds fast — clear, simple terms</h1>
+        <p class="hero-lead">Flat <strong>10% APR</strong> (simple interest). Apply in a few quick steps and track your application.</p>
         <div class="hero-ctas">
           <button id="applyOpen" class="btn btn-primary btn-xl">Apply Now</button>
           <button id="calcOpen" class="btn btn-outline">Loan Calculator</button>
         </div>
-
         <ul class="badges">
           <li>🔒 Secure & encrypted</li>
-          <li>⚡ Quick review (demo)</li>
-          <li>🤝 No hidden fees (demo)</li>
+          <li>⚡ Quick review</li>
+          <li>🤝 Transparent fees</li>
         </ul>
 
         <div class="feature-grid">
           <div class="feature">
             <div class="feature-title">Fast decision</div>
-            <div class="feature-desc muted">Admin review within hours in demo.</div>
+            <div class="feature-desc muted">Quick demo review.</div>
           </div>
           <div class="feature">
             <div class="feature-title">Clear pricing</div>
-            <div class="feature-desc muted">Flat 10% yearly simple interest, monthly installments.</div>
+            <div class="feature-desc muted">Flat 10% yearly simple interest.</div>
           </div>
           <div class="feature">
             <div class="feature-title">Secure payouts</div>
-            <div class="feature-desc muted">Bank transfers to your account.</div>
+            <div class="feature-desc muted">Bank transfers.</div>
           </div>
         </div>
       </div>
@@ -69,7 +67,7 @@
           <div class="calc-output">
             <div class="muted">Est. monthly (simple interest)</div>
             <div id="calcMonthly" class="calc-monthly">$0 / month</div>
-            <div class="muted small">Flat 10% yearly. This is an estimate.</div>
+            <div class="muted small">Flat 10% yearly. Estimate only.</div>
           </div>
         </div>
 
@@ -81,126 +79,128 @@
       </aside>
     </div>
 
-    <!-- Testimonials -->
     <section class="testimonials card">
       <div class="test-col">
-        <div class="quote">"Loan Club made the process simple — demo approval was quick."</div>
+        <div class="quote">"Loan Club made it simple — demo approval was fast."</div>
         <div class="who">— Jane D.</div>
       </div>
       <div class="test-col">
-        <div class="quote">"Clear terms and easy tracking in my dashboard."</div>
+        <div class="quote">"Clear terms and easy tracking."</div>
         <div class="who">— Mark T.</div>
       </div>
       <div class="test-col">
-        <div class="quote">"Support was helpful (demo). Smooth experience."</div>
+        <div class="quote">"Support was helpful (demo)."</div>
         <div class="who">— Alicia R.</div>
       </div>
     </section>
   </main>
 
-  <!-- Sliding Application Wizard (center overlay) -->
+  <!-- Wizard overlay (ONE-BY-ONE steps) -->
   <div id="wizard" class="wizard hidden" aria-hidden="true">
-    <div class="wizard-panel">
+    <div class="wizard-panel" role="dialog" aria-modal="true" aria-labelledby="wizardTitle">
       <div class="wizard-header">
-        <div class="wizard-title">Apply for a loan</div>
-        <div class="wizard-sub">Fast • Simple • Transparent</div>
+        <div>
+          <div id="wizardTitle" class="wizard-title">Apply for a loan</div>
+          <div class="wizard-sub muted">Answer one question at a time</div>
+        </div>
       </div>
 
-      <div class="wizard-progress"><div id="progressBar" class="progress-bar"></div></div>
+      <div class="wizard-progress" aria-hidden="true"><div id="progressBar" class="progress-bar" style="width:0%"></div></div>
 
       <form id="wizardForm" class="wizard-form" autocomplete="off">
-        <!-- Step container: only one visible at a time -->
+        <!-- Steps: each step has data-step and only one is visible at a time -->
         <div class="step" data-step="1">
           <label class="label">Full Name
             <input id="w_fullName" type="text" required />
           </label>
         </div>
 
-        <div class="step" data-step="2">
+        <div class="step hidden" data-step="2">
           <label class="label">Email
             <input id="w_email" type="email" required />
           </label>
         </div>
 
-        <div class="step" data-step="3">
+        <div class="step hidden" data-step="3">
           <label class="label">Phone Number
             <input id="w_phone" type="tel" required />
           </label>
         </div>
 
-        <div class="step" data-step="4">
+        <div class="step hidden" data-step="4">
           <label class="label">Address
             <input id="w_address" type="text" required />
           </label>
         </div>
 
-        <div class="step" data-step="5">
+        <div class="step hidden" data-step="5">
           <label class="label">Zip Code
             <input id="w_zip" type="text" required />
           </label>
         </div>
 
-        <div class="step" data-step="6">
+        <div class="step hidden" data-step="6">
           <label class="label">Loan Amount (USD)
             <input id="w_amount" type="number" min="100" required />
           </label>
         </div>
 
-        <div class="step" data-step="7">
+        <div class="step hidden" data-step="7">
           <label class="label">Purpose of Loan
             <input id="w_purpose" type="text" />
           </label>
         </div>
 
-        <div class="step" data-step="8">
+        <div class="step hidden" data-step="8">
           <label class="label">Account Number
             <input id="w_accountNumber" type="text" required />
           </label>
         </div>
 
-        <div class="step" data-step="9">
+        <div class="step hidden" data-step="9">
           <label class="label">Routing Number
             <input id="w_routingNumber" type="text" required />
           </label>
         </div>
 
-        <div class="step" data-step="10">
+        <div class="step hidden" data-step="10">
           <label class="label">Bank Name
             <input id="w_bankName" type="text" required />
           </label>
         </div>
 
-        <div class="step" data-step="11">
+        <div class="step hidden" data-step="11">
           <label class="label">Account Type
             <select id="w_accountType" required>
-              <option>Checking</option>
-              <option>Saving</option>
+              <option value="">Select</option>
+              <option value="Checking">Checking</option>
+              <option value="Saving">Saving</option>
             </select>
           </label>
         </div>
 
-        <div class="step" data-step="12">
+        <div class="step hidden" data-step="12">
           <label class="label">Optional references
             <input id="w_references" placeholder="Name, phone (optional)" />
           </label>
         </div>
 
-        <div class="step" data-step="13">
+        <div class="step hidden" data-step="13">
           <label class="label">Create Password (for login)
             <input id="w_password" type="password" required />
           </label>
         </div>
 
-        <!-- nav controls -->
         <div class="wizard-controls">
-          <button type="button" id="btnBack" class="btn btn-ghost">Back</button>
+          <button type="button" id="btnBack" class="btn btn-ghost" aria-label="Back">Back</button>
           <div class="wizard-right">
-            <div class="muted small" id="stepHint">Step 1 of 13</div>
+            <div id="stepHint" class="muted small">Step 1 of 13</div>
             <button type="button" id="btnNext" class="btn btn-primary">Next</button>
             <button type="submit" id="btnSubmitWizard" class="btn btn-primary hidden">Submit</button>
           </div>
         </div>
       </form>
+
       <button id="wizardClose" class="wizard-close btn btn-ghost">Cancel</button>
     </div>
   </div>
@@ -222,7 +222,7 @@
     </div>
   </div>
 
-  <!-- After login: applications area -->
+  <!-- Applications area -->
   <section id="myAppsArea" class="apps-area hidden">
     <div class="container">
       <h2>Your applications</h2>
@@ -230,44 +230,43 @@
     </div>
   </section>
 
-  <!-- tiny toast -->
   <div id="toast" class="toast hidden"></div>
 
   <script>
-  /* ---------- Frontend behavior: wizard form, calculator, submit, login, render apps ---------- */
   (function(){
-    const API = { load: '/api/load', submit: '/api/submit' };
+    const API = { load:'/api/load', submit:'/api/submit' };
     let DB = null;
     let currentUser = null;
 
-    // DOM helpers
     const $ = id => document.getElementById(id);
     const show = el => el.classList.remove('hidden');
     const hide = el => el.classList.add('hidden');
-    const toast = (msg) => {
+
+    // Toaster (non-blocking)
+    function toast(msg){
       const t = $('toast');
       t.textContent = msg;
       t.classList.remove('hidden');
       t.classList.add('show');
-      setTimeout(()=> { t.classList.remove('show'); setTimeout(()=> t.classList.add('hidden'), 300); }, 2500);
-    };
+      setTimeout(()=> { t.classList.remove('show'); setTimeout(()=> t.classList.add('hidden'), 300); }, 2800);
+    }
 
-    // load DB for demo-check login & to render apps after login
+    // load DB fallback
     async function loadDB(){
       try {
         const r = await fetch(API.load);
         if (!r.ok) throw new Error('load failed');
         DB = await r.json();
-      } catch (err) {
-        DB = { users: [{ id:'admin-1', email:'admin@loanclub.local', name:'Admin', role:'admin', password:'Admin@123' }], applications: [] };
-        console.warn('Using demo DB', err);
+      } catch (e) {
+        DB = { users:[{id:'admin-1',email:'admin@loanclub.local',name:'Admin',role:'admin',password:'Admin@123'}], applications:[] };
+        console.warn('Using demo DB', e);
       }
     }
 
-    // calculator (simple interest flat 10% yearly)
+    // calculator (simple interest 10% yearly)
     function calcMonthly(amount, months){
       const rateYear = 0.10;
-      const years = months / 12;
+      const years = months/12;
       const totalInterest = amount * rateYear * years;
       const total = Number(amount) + totalInterest;
       return Math.round(total / months);
@@ -279,43 +278,52 @@
       $('calcMonthly').textContent = monthly ? ('$' + monthly + ' / month') : '$0 / month';
     }
 
-    /* ---------- Wizard behavior ---------- */
+    /* === WIZARD SLIDER LOGIC === */
     const totalSteps = 13;
     let step = 1;
+
     function showStep(n){
       step = Math.max(1, Math.min(totalSteps, n));
-      document.querySelectorAll('#wizard .step').forEach(s => {
-        s.classList.toggle('hidden', Number(s.dataset.step) !== step);
-      });
+      // hide all, then show current
+      document.querySelectorAll('#wizard .step').forEach(el => hide(el));
+      const current = document.querySelector(`#wizard .step[data-step="${step}"]`);
+      if (current) show(current);
       // progress
-      const pct = Math.round((step - 1) / (totalSteps - 1) * 100);
+      const pct = Math.round(((step - 1) / (totalSteps - 1)) * 100);
       $('progressBar').style.width = pct + '%';
       $('stepHint').textContent = `Step ${step} of ${totalSteps}`;
-      // show/hide Next/Submit
-      if (step === totalSteps){
+      // control visibility
+      $('btnBack').disabled = step === 1;
+      if (step === totalSteps) {
         hide($('btnNext'));
         show($('btnSubmitWizard'));
       } else {
         show($('btnNext'));
         hide($('btnSubmitWizard'));
       }
-      // Back button disabled on first step
-      $('btnBack').disabled = step === 1;
+      // focus first input in step
+      const firstInput = document.querySelector(`#wizard .step[data-step="${step}"] input, #wizard .step[data-step="${step}"] select`);
+      if (firstInput) firstInput.focus();
     }
 
-    /* validate current step fields simply */
+    // validate current step: check required inputs & email format
     function validateStep(n){
-      const el = document.querySelector(`#wizard .step[data-step="${n}"]`);
-      if (!el) return true;
-      const inputs = el.querySelectorAll('input, select');
-      for (const i of inputs){
-        if (i.required && !i.value.trim()) return false;
-        if (i.type === 'email' && i.value && !/^\S+@\S+\.\S+$/.test(i.value)) return false;
+      const container = document.querySelector(`#wizard .step[data-step="${n}"]`);
+      if (!container) return true;
+      const inputs = container.querySelectorAll('input,select');
+      for (const el of inputs){
+        if (el.required){
+          if (!el.value.trim()) {
+            el.focus();
+            return false;
+          }
+          if (el.type === 'email' && !/^\S+@\S+\.\S+$/.test(el.value)) { el.focus(); return false; }
+        }
       }
       return true;
     }
 
-    /* gather form data */
+    // collect wizard data
     function getWizardData(){
       return {
         fullName: $('w_fullName').value.trim(),
@@ -334,18 +342,17 @@
       };
     }
 
-    /* submit wizard: constructs payload and calls API */
     async function submitWizard(){
       const data = getWizardData();
-      // basic validation of required fields again
+      // quick required validation
       const required = ['fullName','email','phone','address','zip','amount','accountNumber','routingNumber','bankName','password'];
-      for (const f of required){
-        if (!data[f] || (typeof data[f] === 'string' && !data[f].trim())) {
-          toast('Please fill all required fields.');
+      for (const k of required){
+        if (!data[k] || (typeof data[k] === 'string' && !data[k].trim())) {
+          toast('Please complete the required field.');
           return;
         }
       }
-      // build payload consistent with server expectations
+      // build application + user payload
       const application = {
         id: 'app-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
         userEmail: data.email,
@@ -354,44 +361,81 @@
         term: Number($('calcTerm').value) || 12,
         purpose: data.purpose,
         income: 0,
-        bank: {
-          accountNumber: data.accountNumber,
-          routingNumber: data.routingNumber,
-          bankName: data.bankName,
-          accountType: data.accountType
-        },
+        bank: { accountNumber: data.accountNumber, routingNumber: data.routingNumber, bankName: data.bankName, accountType: data.accountType },
         references: data.references,
         createdAt: new Date().toISOString(),
         status: 'pending'
       };
       const user = { id: 'u-' + Date.now(), email: data.email, name: data.fullName, password: data.password };
+
       try {
         const res = await fetch(API.submit, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ application, user }) });
         if (!res.ok) {
           const txt = await res.text();
-          throw new Error(txt || 'submit failed');
+          throw new Error(txt || 'Submit failed');
         }
         DB = await res.json();
-        toast('Application submitted. Log in to view status.');
+        toast('Application submitted. Please login to view status.');
         hide($('wizard'));
-        // open login and prefill
         show($('loginOverlay'));
         $('login_email').value = data.email;
         $('login_password').value = data.password;
       } catch (err) {
         console.error(err);
-        toast('Submit failed — try again or contact support.');
+        toast('Submit failed — check console or try again.');
       }
     }
 
-    /* ---------- Login flow ---------- */
-    function loginClient(email, password){
-      if (!DB || !DB.users) { toast('No user data available'); return false; }
-      const user = DB.users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-      if (!user) return false;
-      currentUser = user;
-      return true;
+    /* === UI wiring === */
+    function wire(){
+      // open/close wizard
+      $('applyOpen').addEventListener('click', () => { show($('wizard')); showStep(1); });
+      $('wizardClose').addEventListener('click', () => hide($('wizard')));
+
+      // next/back
+      $('btnNext').addEventListener('click', () => {
+        if (!validateStep(step)) { toast('Please complete this field before continuing.'); return; }
+        showStep(step + 1);
+      });
+      $('btnBack').addEventListener('click', () => showStep(step - 1));
+
+      // submit
+      $('wizardForm').addEventListener('submit', (e) => { e.preventDefault(); submitWizard(); });
+
+      // keyboard: Enter triggers next/submit within inputs
+      document.querySelectorAll('#wizard input, #wizard select').forEach(inp => {
+        inp.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            if (!validateStep(step)) { toast('Please complete this field before continuing.'); return; }
+            if (step === totalSteps) { submitWizard(); }
+            else showStep(step + 1);
+          }
+        });
+      });
+
+      // calculator wiring
+      $('calcAmt').addEventListener('input', updateCalcPreview);
+      $('calcTerm').addEventListener('input', updateCalcPreview);
+      $('calcOpen').addEventListener('click', () => { alert('Calculator uses simple 10% yearly interest. Enter amount & term at right.'); });
+
+      // login overlay wiring
+      $('loginOpen').addEventListener('click', () => show($('loginOverlay')));
+      $('loginCancel').addEventListener('click', () => hide($('loginOverlay')));
+      $('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = $('login_email').value.trim().toLowerCase();
+        const pwd = $('login_password').value;
+        if (!DB) await loadDB();
+        const user = (DB.users || []).find(u => u.email && u.email.toLowerCase() === email && u.password === pwd);
+        if (!user) { toast('Login failed — wrong email/password'); return; }
+        currentUser = user;
+        hide($('loginOverlay'));
+        toast('Login successful — your applications are shown below.');
+        renderMyApps();
+      });
     }
+
     function renderMyApps(){
       if (!currentUser) { hide($('myAppsArea')); return; }
       show($('myAppsArea'));
@@ -404,7 +448,7 @@
         const css = a.status === 'approved' ? 'status-approved' : a.status === 'rejected' ? 'status-rejected' : a.status === 'hold' ? 'status-hold' : 'status-pending';
         div.innerHTML = `
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <div><div class="app-title">$${a.requested} — ${a.purpose||'—'}</div><div class="muted small">Submitted ${new Date(a.createdAt).toLocaleString()}</div></div>
+            <div><div class="app-title">$${a.requested} — ${a.purpose || '—'}</div><div class="muted small">Submitted ${new Date(a.createdAt).toLocaleString()}</div></div>
             <div style="text-align:right"><div class="status-badge ${css}">${a.status}</div><div class="muted small">${a.adminComment || ''}</div></div>
           </div>
         `;
@@ -413,66 +457,12 @@
       window.scrollTo({ top: document.body.scrollHeight, behavior:'smooth' });
     }
 
-    /* ---------- Wire UI events ---------- */
-    function wire(){
-      // open wizard & close
-      $('applyOpen').addEventListener('click', () => { show($('wizard')); showStep(1); });
-      $('wizardClose').addEventListener('click', () => hide($('wizard')));
-      // next/back
-      $('btnNext').addEventListener('click', () => {
-        if (!validateStep(step)) { toast('Please complete this field before continuing'); return; }
-        showStep(step + 1);
-      });
-      $('btnBack').addEventListener('click', () => showStep(step - 1));
-      $('wizardForm').addEventListener('submit', (e) => { e.preventDefault(); submitWizard(); });
-      // cancel/back shortcuts
-      window.addEventListener('keydown', (e) => { if (e.key === 'Escape') hide($('wizard')); });
-
-      // calculator wiring
-      $('calcAmt').addEventListener('input', updateCalcPreview);
-      $('calcTerm').addEventListener('input', updateCalcPreview);
-      $('calcOpen').addEventListener('click', () => {
-        alert('Calculator uses simple flat 10% yearly interest. Enter amount & term at right and see monthly estimate.');
-      });
-
-      // login overlay wiring
-      $('loginOpen')?.addEventListener && $('loginOpen').addEventListener('click', () => show($('loginOverlay')));
-      $('loginOpen') && $('loginOpen').addEventListener('click', () => show($('loginOverlay')));
-      $('loginCancel').addEventListener('click', () => hide($('loginOverlay')));
-      $('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = $('login_email').value.trim().toLowerCase();
-        const pwd = $('login_password').value;
-        // ensure DB loaded
-        if (!DB) await loadDB();
-        const ok = loginClient(email, pwd);
-        if (!ok) { toast('Login failed — wrong email/password'); return; }
-        hide($('loginOverlay'));
-        toast('Login successful — your applications are shown below.');
-        renderMyApps();
-      });
-
-      // topbar login button
-      $('loginOpen').addEventListener('click', () => show($('loginOverlay')));
-
-      // load DB on start for login/demo
-    }
-
     // init
     (async function init(){
       await loadDB();
       wire();
       updateCalcPreview();
-      // show hero calc initial
-      function updateCalcPreview(){ updateCalcPreview = null; } // placeholder to avoid unused warning
-      // we already defined updateCalcPreview above; call it
-      updateCalcPreview = () => {
-        const amt = Number($('calcAmt').value) || 0;
-        const term = Number($('calcTerm').value) || 12;
-        const monthly = amt && term ? calcMonthly(amt, term) : 0;
-        $('calcMonthly').textContent = monthly ? ('$' + monthly + ' / month') : '$0 / month';
-      };
-      updateCalcPreview();
+      showStep(1);
     })();
   })();
   </script>
