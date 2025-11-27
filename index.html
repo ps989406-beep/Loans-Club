@@ -499,88 +499,124 @@
     }
 
     /* UI Wiring — robust login that refreshes DB before checking credentials */
-    function wire(){
-      // main CTAs
-      $('applyOpen').addEventListener('click', () => openWizardForNewApp());
-      $('calcOpen').addEventListener('click', () => alert('Calculator uses flat 10% yearly simple interest.'));
+    /* UI Wiring — robust login that refreshes DB before checking credentials */
+function wire(){
+  // main CTAs (safe)
+  const applyBtn = $('applyOpen');
+  if (applyBtn) applyBtn.addEventListener('click', () => openWizardForNewApp());
+  const calcBtn = $('calcOpen');
+  if (calcBtn) calcBtn.addEventListener('click', () => alert('Calculator uses flat 10% yearly simple interest.'));
 
-      // wizard controls
-      $('wizardClose').addEventListener('click', () => hide($('wizard')));
-      $('btnNext').addEventListener('click', () => { if (!validateStep(step)) { toast('Please complete required field'); return; } showStep(step + 1); });
-      $('btnBack').addEventListener('click', () => showStep(step - 1));
-      document.querySelectorAll('#wizard input, #wizard select').forEach(inp => inp.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); if (!validateStep(step)) { toast('Please complete required field'); return; } if (step === totalSteps) submitWizard(); else showStep(step + 1); }
-      }));
-      $('wizardForm').addEventListener('submit', (e) => { e.preventDefault(); submitWizard(); });
-
-      // login overlay open/close
-      $('loginOpen').addEventListener('click', () => show($('loginOverlay')));
-      $('loginCancel').addEventListener('click', () => hide($('loginOverlay')));
-
-      // login submit (robust: refresh DB first)
-      $('loginForm').addEventListener('submit', async (e) => {
+  // wizard controls (safe)
+  const wizardClose = $('wizardClose');
+  if (wizardClose) wizardClose.addEventListener('click', () => hide($('wizard')));
+  const btnNextEl = $('btnNext');
+  if (btnNextEl) btnNextEl.addEventListener('click', () => { if (!validateStep(step)) { toast('Please complete required field'); return; } showStep(step + 1); });
+  const btnBackEl = $('btnBack');
+  if (btnBackEl) btnBackEl.addEventListener('click', () => showStep(step - 1));
+  document.querySelectorAll('#wizard input, #wizard select').forEach(inp => {
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
         e.preventDefault();
-        const email = $('login_email').value.trim().toLowerCase();
-        const pwd = $('login_password').value;
+        if (!validateStep(step)) { toast('Please complete required field'); return; }
+        if (step === totalSteps) submitWizard(); else showStep(step + 1);
+      }
+    });
+  });
+  const wizardForm = $('wizardForm');
+  if (wizardForm) wizardForm.addEventListener('submit', (e) => { e.preventDefault(); submitWizard(); });
 
-        if (!email || !pwd) { toast('Please enter both email and password.'); return; }
+  // login overlay open/close (safe)
+  const loginOpenBtn = $('loginOpen');
+  if (loginOpenBtn) loginOpenBtn.addEventListener('click', () => show($('loginOverlay')));
+  const loginCancelBtn = $('loginCancel');
+  if (loginCancelBtn) loginCancelBtn.addEventListener('click', () => hide($('loginOverlay')));
 
-        // refresh DB so recent signups are included
-        try {
-          const r = await fetch(API.load, { cache: 'no-store' });
-          if (r.ok) DB = await r.json();
-        } catch (err) {
-          console.warn('DB refresh failed before login', err);
-        }
+  // login submit (robust: refresh DB first)
+  const loginForm = $('loginForm');
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = $('login_email').value.trim().toLowerCase();
+      const pwd = $('login_password').value;
 
-        // find user and validate password
-        const user = loginClient(email, pwd);
-        if (!user) {
-          const byEmail = (DB && DB.users) ? (DB.users.find(u => u.email && u.email.toLowerCase() === email)) : null;
-          if (byEmail) toast('Password incorrect for this email.');
-          else toast('Account not found. You can create one by submitting an application.');
-          return;
-        }
+      if (!email || !pwd) { toast('Please enter both email and password.'); return; }
 
-        currentUser = user;
-        saveUserToLocal(user);
-        updateTopActions();
-        showLoggedInView();
-        hide($('loginOverlay'));
-        toast('Logged in — welcome back!');
-      });
+      // refresh DB so recent signups are included
+      try {
+        const r = await fetch(API.load, { cache: 'no-store' });
+        if (r.ok) DB = await r.json();
+      } catch (err) {
+        console.warn('DB refresh failed before login', err);
+      }
 
-      // logged-in view buttons
-      document.getElementById('newAppBtn').addEventListener('click', () => openWizardForNewApp());
-      document.getElementById('logoutBtn').addEventListener('click', () => doLogout());
+      // find user and validate password
+      const user = loginClient(email, pwd);
+      if (!user) {
+        const byEmail = (DB && DB.users) ? (DB.users.find(u => u.email && u.email.toLowerCase() === email)) : null;
+        if (byEmail) toast('Password incorrect for this email.');
+        else toast('Account not found. You can create one by submitting an application.');
+        return;
+      }
 
-      // close wizard by clicking backdrop
-      $('wizard').addEventListener('click', (e) => { if (e.target === $('wizard')) hide($('wizard')); });
+      currentUser = user;
+      saveUserToLocal(user);
+      updateTopActions();
+      showLoggedInView();
+      hide($('loginOverlay'));
+      toast('Logged in — welcome back!');
+    });
+  }
 
-      // ESC closes overlays
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') { hide($('wizard')); hide($('loginOverlay')); }
-      });
+  // logged-in view buttons (these might not exist until the DOM shows loggedInView; attach if present)
+  const newAppStatic = document.getElementById('newAppBtn');
+  if (newAppStatic) newAppStatic.addEventListener('click', () => openWizardForNewApp());
+  const logoutStatic = document.getElementById('logoutBtn');
+  if (logoutStatic) logoutStatic.addEventListener('click', () => doLogout());
 
-      // calculator wiring
-      $('calcAmt').addEventListener('input', updateCalcPreview);
-      $('calcTerm').addEventListener('input', updateCalcPreview);
-    }
+  // close wizard by clicking backdrop (safe)
+  const wizardWrap = $('wizard');
+  if (wizardWrap) wizardWrap.addEventListener('click', (e) => { if (e.target === wizardWrap) hide($('wizard')); });
+
+  // ESC closes overlays
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { hide($('wizard')); hide($('loginOverlay')); }
+  });
+
+  // calculator wiring (safe)
+  const calcAmtEl = $('calcAmt');
+  const calcTermEl = $('calcTerm');
+  if (calcAmtEl) calcAmtEl.addEventListener('input', updateCalcPreview);
+  if (calcTermEl) calcTermEl.addEventListener('input', updateCalcPreview);
+}
+
 
     // calculator
-    function calcMonthly(amount, months){
-      const rateYear = 0.10;
-      const years = months/12;
-      const totalInterest = amount * rateYear * years;
-      const total = Number(amount) + totalInterest;
-      return Math.round(total / months);
-    }
-    function updateCalcPreview(){
-      const amt = Number($('calcAmt').value) || 0;
-      const term = Number($('calcTerm').value) || 12;
-      const monthly = amt && term ? calcMonthly(amt, term) : 0;
-      $('calcMonthly').textContent = monthly ? ('$' + monthly + ' / month') : '$0 / month';
-    }
+    // calculator: simple interest 10% yearly - defensive and formatted
+function calcMonthly(amount, months){
+  amount = Number(amount) || 0;
+  months = Number(months) || 1;
+  if (amount <= 0 || months <= 0) return 0;
+  const rateYear = 0.10;
+  const years = months / 12;
+  const totalInterest = amount * rateYear * years;
+  const total = amount + totalInterest;
+  // round to 2 decimals then to integer dollars for monthly
+  const monthly = total / months;
+  return Math.round(monthly); 
+}
+
+function updateCalcPreview(){
+  const amt = Number($('calcAmt') ? $('calcAmt').value : 0) || 0;
+  const term = Number($('calcTerm') ? $('calcTerm').value : 0) || 12;
+  const monthly = amt && term ? calcMonthly(amt, term) : 0;
+  const el = $('calcMonthly');
+  if (el) {
+    if (monthly === 0) el.textContent = '$0 / month';
+    else el.textContent = ('$' + monthly.toLocaleString() + ' / month');
+  }
+}
+
 
     // INIT
     (async function init(){
