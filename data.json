@@ -1,16 +1,7 @@
 {
-  "meta": {
-    "brand": "Loan Club",
-    "created_at": "2025-11-27T00:00:00Z"
-  },
+  "meta": { "brand": "Loan Club", "created_at": "2025-11-27T00:00:00Z" },
   "users": [
-    {
-      "id": "admin-1",
-      "email": "admin@loanclub.local",
-      "name": "Admin",
-      "role": "admin",
-      "password": "Admin@123"
-    }
+    { "id": "admin-1", "email": "admin@loanclub.local", "name": "Admin", "role": "admin", "password": "Admin@123" }
   ],
   "applications": []
 }
