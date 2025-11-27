@@ -17,6 +17,13 @@
       "name": "rxtcvbj",
       "role": "user",
       "password": "sffcvb"
+    },
+    {
+      "id": "u-1764244537159",
+      "email": "rdfghb@regh.jhgfd",
+      "name": "dszfgxhcvj",
+      "password": "xhgfhghgh",
+      "role": "user"
     }
   ],
   "applications": [
@@ -35,6 +42,27 @@
       },
       "references": "sf",
       "createdAt": "2025-11-27T11:48:20.191Z",
+      "status": "pending"
+    },
+    {
+      "id": "app-1764244537159-j0im",
+      "userEmail": "rdfghb@regh.jhgfd",
+      "userName": "dszfgxhcvj",
+      "phone": "345654554",
+      "address": "tdxfhgcnbv",
+      "zip": "343434",
+      "requested": 434343,
+      "term": 12,
+      "purpose": "dxh ngh",
+      "income": 0,
+      "bank": {
+        "accountNumber": "hhgfhdghgh",
+        "routingNumber": "545454545",
+        "bankName": "hthtfhhth",
+        "accountType": "Checking"
+      },
+      "references": "dhghhh",
+      "createdAt": "2025-11-27T11:55:37.159Z",
       "status": "pending"
     }
   ]
