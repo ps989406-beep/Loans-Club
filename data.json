@@ -24,6 +24,13 @@
       "name": "test",
       "role": "user",
       "password": "test@mail.us"
+    },
+    {
+      "id": "u-1764239595578",
+      "email": "www@www.www",
+      "name": "htrgrdf",
+      "role": "user",
+      "password": "www"
     }
   ],
   "applications": [
@@ -106,6 +113,23 @@
       "status": "hold",
       "adminComment": "Application details pending. contact support 2345678765 within 24 hours.",
       "adminAt": "2025-11-27T09:30:09.289Z"
+    },
+    {
+      "id": "app-1764239595578-5x64",
+      "userEmail": "www@www.www",
+      "userName": "htrgrdf",
+      "requested": 6565,
+      "term": 12,
+      "purpose": "hdbhdhfghfg",
+      "bank": {
+        "accountNumber": "45454545454",
+        "routingNumber": "545454545454",
+        "bankName": "hdhhgh",
+        "accountType": "Checking"
+      },
+      "references": "gdgdfgfd",
+      "createdAt": "2025-11-27T10:33:15.578Z",
+      "status": "pending"
     }
   ]
 }
