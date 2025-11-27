@@ -29,7 +29,11 @@
   --mono: "Inter", system-ui, sans-serif;
 }
 
+/* ====================
+   BASE + UTILITIES
+   ==================== */
 *{box-sizing:border-box}
+html,body{height:100%}
 body{
   margin:0;
   font-family:var(--mono);
@@ -38,7 +42,15 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
-/* HEADER */
+/* IMPORTANT: utility to hide overlays/steps */
+.hidden{display:none !important;}
+
+/* small helper so elements that overlay can be pointer-events disabled when hidden */
+.wizard.hidden, .overlay-small.hidden { display: none !important; pointer-events: none; }
+
+/* ====================
+   HEADER / HERO / CTA
+   ==================== */
 .topbar{
   padding:18px 0;
   background:rgba(10,15,28,0.65);
@@ -57,9 +69,8 @@ body{
   box-shadow:0 12px 40px rgba(0,153,255,0.35);
 }
 
-/* HERO */
 .hero-wrap{max-width:1200px;margin:auto;padding:34px 22px}
-.hero-card{display:flex;gap:32px}
+.hero-card{display:flex;gap:32px;flex-wrap:wrap}
 .hero-title{font-size:38px;font-weight:900;margin-bottom:10px;color:white}
 .hero-lead{color:var(--text-muted);max-width:600px}
 
@@ -67,6 +78,7 @@ body{
 .btn{
   padding:12px 18px;border-radius:12px;font-weight:800;cursor:pointer;
   border:1px solid rgba(255,255,255,0.12);
+  background:transparent;
 }
 .btn-primary{
   background:linear-gradient(90deg,var(--blue-neon),var(--violet-neon));
@@ -82,11 +94,10 @@ body{
   border:1px solid rgba(255,255,255,0.12);
   color:var(--text-light);
 }
+.btn-xl{padding:14px 18px;font-size:16px}
 
-/* TRUST BADGES */
+/* BADGES / FEATURES */
 .badges{display:flex;gap:18px;font-weight:700;margin-top:18px;color:var(--text-muted)}
-
-/* FEATURE CARDS */
 .feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px}
 .feature{
   background:var(--bgCard);
@@ -106,6 +117,7 @@ body{
   color:white;
 }
 .calc-title{font-weight:900;font-size:17px;margin-bottom:10px}
+.calc-controls{display:flex;gap:8px}
 .calc-controls input{
   width:50%;padding:12px;border-radius:10px;
   background:#1a1f35;border:1px solid rgba(255,255,255,0.12);
@@ -134,18 +146,40 @@ body{
 .quote{font-weight:900;font-size:15px}
 .who{color:var(--text-muted);margin-top:6px;font-size:13px}
 
-/* WIZARD (FORM) — DARK NAVY */
+/* ====================
+   WIZARD (OVERLAY FORM)
+   ==================== */
+/* Backdrop */
 .wizard{
   position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
   background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);z-index:80;padding:20px;
+  /* allow clicking on backdrop — JS can listen for clicks on .wizard to close */
+  cursor:default;
 }
+
+/* Panel */
 .wizard-panel{
   background:linear-gradient(180deg,#10253f,#081828);
   padding:22px;border-radius:18px;
   border:1px solid rgba(255,255,255,0.10);
   box-shadow:0 40px 120px rgba(0,0,0,0.65);
   width:100%;max-width:680px;
+  position:relative;
 }
+
+/* Close button: more visible / larger tap target */
+.wizard-panel .wizard-close{
+  position:absolute;
+  right:16px;
+  top:12px;
+  padding:8px 10px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.04);
+  color:var(--text-muted);
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+/* Header & text */
 .wizard-title{color:white;font-weight:900;font-size:20px}
 .wizard-sub{color:var(--text-muted)}
 
@@ -158,23 +192,25 @@ body{
   transition:width .3s ease;
 }
 
-/* FORM INPUTS */
+/* steps inputs (navy theme) */
 .label{font-weight:800;margin-bottom:8px;color:white}
 .wizard-form input, .wizard-form select{
   width:100%;padding:14px;border-radius:12px;color:white;
   background:#152238;border:1px solid rgba(255,255,255,0.15);
   margin-bottom:10px;box-shadow:inset 0 0 10px rgba(0,0,0,0.35)
 }
-
-/* WIZARD BUTTONS */
 .wizard-controls{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
-.wizard-close{
-  margin-top:16px;color:var(--text-muted);
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.16)
-}
+.wizard-right{display:flex;align-items:center;gap:12px}
 
-/* LOGIN OVERLAY (NEON TOUCH) */
+/* make steps visually hidden using .hidden (JS toggles) */
+#wizard .step.hidden { display:none !important; }
+
+/* ====================
+   LOGIN OVERLAY (SMALL)
+   ==================== */
+.overlay-small{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.65);z-index:90;
+}
 .overlay-small-panel{
   width:100%;max-width:420px;padding:20px;
   background:linear-gradient(180deg,#101d2e,#0c1626);
@@ -186,7 +222,9 @@ body{
   color:white;background:#152238;border:1px solid rgba(255,255,255,0.15)
 }
 
-/* APPLICATION CARDS */
+/* ====================
+   APPLICATION CARDS
+   ==================== */
 .app-card{
   background:#101b2d;padding:14px;border-radius:12px;
   border:1px solid rgba(255,255,255,0.10);
@@ -194,7 +232,6 @@ body{
 }
 .app-title{font-weight:900}
 
-/* STATUS BADGES */
 .status-badge{padding:6px 12px;border-radius:999px;font-weight:900;font-size:13px}
 .status-pending{background:#4c4c12;color:#fff}
 .status-approved{background:#0e5d32;color:white}
@@ -212,7 +249,9 @@ body{
 .toast.show{opacity:1;transform:translateY(0)}
 .toast.hidden{display:block;opacity:0}
 
-/* RESPONSIVE */
+/* ====================
+   RESPONSVIE
+   ==================== */
 @media(max-width:980px){
   .hero-card{flex-direction:column}
   .hero-right{width:100%}
