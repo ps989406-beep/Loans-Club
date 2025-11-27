@@ -3,30 +3,31 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Loan Club — Apply (Wizard fixed)</title>
+  <title>Loan Club — Apply (Persistent Login)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css" />
-  <meta name="description" content="Loan Club — wizard application (one-by-one)"/>
+  <meta name="description" content="Loan Club — wizard application with persistent login"/>
 </head>
 <body>
   <!-- Top bar -->
   <header class="topbar">
     <div class="topbar-inner">
-      <div class="brand">
+      <div class="brand" style="display:flex;align-items:center;gap:12px">
         <div class="logo">LC</div>
-        <div class="brand-text">
+        <div style="line-height:1">
           <div class="brand-name">Loan Club</div>
-          <div class="brand-sub">Simple • Transparent • Fast</div>
+          <div class="brand-sub" style="color:var(--text-muted);font-size:12px">Simple • Transparent • Fast</div>
         </div>
       </div>
-      <nav class="top-actions">
+
+      <nav class="top-actions" id="topActions">
         <button id="loginOpen" class="btn btn-ghost">Login / Signup</button>
       </nav>
     </div>
   </header>
 
-  <!-- Hero -->
-  <main class="hero-wrap">
+  <!-- Full marketing hero (hidden when logged in) -->
+  <main id="marketing" class="hero-wrap">
     <div class="hero-card">
       <div class="hero-left">
         <h1 class="hero-title">Get funds fast — clear, simple terms</h1>
@@ -95,9 +96,31 @@
     </section>
   </main>
 
+  <!-- Compact logged-in view: My Applications + New Application (shown when logged in) -->
+  <main id="loggedInView" class="hero-wrap hidden" style="padding-top:28px;">
+    <div style="max-width:1100px;margin:0 auto;padding:0 22px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div>
+          <h2 style="margin:0">My Applications</h2>
+          <div class="muted small">View your loan applications and request a new one.</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button id="newAppBtn" class="btn btn-primary">New Application</button>
+          <button id="logoutBtn" class="btn btn-ghost">Logout</button>
+        </div>
+      </div>
+
+      <section id="myAppsArea" class="apps-area">
+        <div id="myAppsList" class="list"></div>
+      </section>
+    </div>
+  </main>
+
   <!-- Wizard overlay (ONE-BY-ONE steps) -->
   <div id="wizard" class="wizard hidden" aria-hidden="true">
     <div class="wizard-panel" role="dialog" aria-modal="true" aria-labelledby="wizardTitle">
+      <button id="wizardClose" class="wizard-close btn btn-ghost">Close</button>
+
       <div class="wizard-header">
         <div>
           <div id="wizardTitle" class="wizard-title">Apply for a loan</div>
@@ -108,7 +131,6 @@
       <div class="wizard-progress" aria-hidden="true"><div id="progressBar" class="progress-bar" style="width:0%"></div></div>
 
       <form id="wizardForm" class="wizard-form" autocomplete="off">
-        <!-- Steps: each step has data-step and only one is visible at a time -->
         <div class="step" data-step="1">
           <label class="label">Full Name
             <input id="w_fullName" type="text" required />
@@ -187,8 +209,9 @@
 
         <div class="step hidden" data-step="13">
           <label class="label">Create Password (for login)
-            <input id="w_password" type="password" required />
+            <input id="w_password" type="password" />
           </label>
+          <div class="muted small" style="margin-top:6px">If you're already logged in this is optional.</div>
         </div>
 
         <div class="wizard-controls">
@@ -200,8 +223,6 @@
           </div>
         </div>
       </form>
-
-      <button id="wizardClose" class="wizard-close btn btn-ghost">Cancel</button>
     </div>
   </div>
 
@@ -222,14 +243,7 @@
     </div>
   </div>
 
-  <!-- Applications area -->
-  <section id="myAppsArea" class="apps-area hidden">
-    <div class="container">
-      <h2>Your applications</h2>
-      <div id="myAppsList" class="list"></div>
-    </div>
-  </section>
-
+  <!-- Applications area for logged-in user (populated dynamically) -->
   <div id="toast" class="toast hidden"></div>
 
   <script>
@@ -241,17 +255,18 @@
     const $ = id => document.getElementById(id);
     const show = el => el.classList.remove('hidden');
     const hide = el => el.classList.add('hidden');
+    const LS_KEY = 'loanclub_user_v1';
 
-    // Toaster (non-blocking)
+    // toast
     function toast(msg){
       const t = $('toast');
       t.textContent = msg;
       t.classList.remove('hidden');
       t.classList.add('show');
-      setTimeout(()=> { t.classList.remove('show'); setTimeout(()=> t.classList.add('hidden'), 300); }, 2800);
+      setTimeout(()=> { t.classList.remove('show'); setTimeout(()=> t.classList.add('hidden'), 300); }, 2600);
     }
 
-    // load DB fallback
+    // load DB (fallback if API fails)
     async function loadDB(){
       try {
         const r = await fetch(API.load);
@@ -263,67 +278,160 @@
       }
     }
 
-    // calculator (simple interest 10% yearly)
-    function calcMonthly(amount, months){
-      const rateYear = 0.10;
-      const years = months/12;
-      const totalInterest = amount * rateYear * years;
-      const total = Number(amount) + totalInterest;
-      return Math.round(total / months);
+    // persist user in localStorage
+    function saveUserToLocal(u){
+      localStorage.setItem(LS_KEY, JSON.stringify({ id:u.id, email:u.email, name:u.name }));
     }
-    function updateCalcPreview(){
-      const amt = Number($('calcAmt').value) || 0;
-      const term = Number($('calcTerm').value) || 12;
-      const monthly = amt && term ? calcMonthly(amt, term) : 0;
-      $('calcMonthly').textContent = monthly ? ('$' + monthly + ' / month') : '$0 / month';
+    function clearUserLocal(){
+      localStorage.removeItem(LS_KEY);
+    }
+    function loadUserFromLocal(){
+      try {
+        const s = localStorage.getItem(LS_KEY);
+        if (!s) return null;
+        return JSON.parse(s);
+      } catch { return null; }
     }
 
-    /* === WIZARD SLIDER LOGIC === */
-    const totalSteps = 13;
-    let step = 1;
-
-    function showStep(n){
-      step = Math.max(1, Math.min(totalSteps, n));
-      // hide all, then show current
-      document.querySelectorAll('#wizard .step').forEach(el => hide(el));
-      const current = document.querySelector(`#wizard .step[data-step="${step}"]`);
-      if (current) show(current);
-      // progress
-      const pct = Math.round(((step - 1) / (totalSteps - 1)) * 100);
-      $('progressBar').style.width = pct + '%';
-      $('stepHint').textContent = `Step ${step} of ${totalSteps}`;
-      // control visibility
-      $('btnBack').disabled = step === 1;
-      if (step === totalSteps) {
-        hide($('btnNext'));
-        show($('btnSubmitWizard'));
+    // update top actions (hide login if logged in)
+    function updateTopActions(){
+      const top = $('topActions');
+      top.innerHTML = '';
+      if (currentUser){
+        // show name and logout
+        const span = document.createElement('div'); span.style.color = 'var(--text-light)'; span.style.fontWeight='700'; span.style.marginRight='12px';
+        span.textContent = currentUser.name || currentUser.email;
+        const newApp = document.createElement('button'); newApp.className='btn btn-primary'; newApp.id='newAppTop'; newApp.textContent='New Application';
+        const logout = document.createElement('button'); logout.className='btn btn-ghost'; logout.id='logoutTop'; logout.textContent='Logout';
+        top.appendChild(span); top.appendChild(newApp); top.appendChild(logout);
+        newApp.addEventListener('click', () => openWizardForNewApp());
+        logout.addEventListener('click', () => doLogout());
       } else {
-        show($('btnNext'));
-        hide($('btnSubmitWizard'));
+        const btn = document.createElement('button'); btn.id='loginOpenHeader'; btn.className='btn btn-ghost'; btn.textContent='Login / Signup';
+        top.appendChild(btn);
+        btn.addEventListener('click', () => show($('loginOverlay')));
       }
-      // focus first input in step
-      const firstInput = document.querySelector(`#wizard .step[data-step="${step}"] input, #wizard .step[data-step="${step}"] select`);
-      if (firstInput) firstInput.focus();
     }
 
-    // validate current step: check required inputs & email format
-    function validateStep(n){
-      const container = document.querySelector(`#wizard .step[data-step="${n}"]`);
-      if (!container) return true;
-      const inputs = container.querySelectorAll('input,select');
-      for (const el of inputs){
-        if (el.required){
-          if (!el.value.trim()) {
-            el.focus();
-            return false;
-          }
-          if (el.type === 'email' && !/^\S+@\S+\.\S+$/.test(el.value)) { el.focus(); return false; }
+    // show logged-in view only (My Applications + New Application button)
+    function showLoggedInView(){
+      hide($('marketing'));
+      show($('loggedInView'));
+      updateTopActions();
+      renderMyApps();
+    }
+    function showMarketingView(){
+      show($('marketing'));
+      hide($('loggedInView'));
+      updateTopActions();
+    }
+
+    // render My Applications for currentUser
+    function renderMyApps(){
+      const container = $('myAppsList');
+      container.innerHTML = '';
+      if (!currentUser) { container.innerHTML = '<div class="muted">Not logged in.</div>'; return; }
+      const apps = (DB.applications || []).filter(a => a.userEmail && a.userEmail.toLowerCase() === currentUser.email.toLowerCase());
+      if (!apps.length) { container.innerHTML = '<div class="muted">No applications yet.</div>'; return; }
+      apps.slice().reverse().forEach(a => {
+        const div = document.createElement('div'); div.className='app-card';
+        const css = a.status === 'approved' ? 'status-approved' : a.status === 'rejected' ? 'status-rejected' : a.status === 'hold' ? 'status-hold' : 'status-pending';
+        div.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div class="app-title">$${a.requested} — ${a.purpose || '—'}</div><div class="muted small">Submitted ${new Date(a.createdAt).toLocaleString()}</div></div>
+            <div style="text-align:right"><div class="status-badge ${css}">${a.status}</div><div class="muted small">${a.adminComment || ''}</div></div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // login client (checks DB.users)
+    function loginClient(email, password){
+      if (!DB || !DB.users) return null;
+      const user = DB.users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+      return user || null;
+    }
+
+    // logout
+    function doLogout(){
+      currentUser = null;
+      clearUserLocal();
+      showMarketingView();
+      toast('Logged out');
+    }
+
+    // open wizard prefilled for new app (if logged in)
+    function openWizardForNewApp(){
+      // reset wizard fields but prefill name/email if logged in
+      document.querySelectorAll('#wizard input, #wizard select').forEach(i => { i.value = ''; });
+      if (currentUser){
+        $('w_fullName').value = currentUser.name || '';
+        $('w_email').value = currentUser.email || '';
+        // make password optional if logged in
+        $('w_password').value = '';
+      }
+      show($('wizard'));
+      showStep(1);
+    }
+
+    // submit wizard (uses currentUser if logged in)
+    async function submitWizard(){
+      const data = getWizardData();
+      // basic required validation
+      const required = ['fullName','email','phone','address','zip','amount','accountNumber','routingNumber','bankName'];
+      for (const k of required){
+        if (!data[k] || (typeof data[k] === 'string' && !data[k].trim())) { toast('Please fill required fields'); return; }
+      }
+      // build payload
+      const application = {
+        id: 'app-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
+        userEmail: data.email,
+        userName: data.fullName,
+        requested: data.amount,
+        term: Number($('calcTerm').value) || 12,
+        purpose: data.purpose,
+        income: 0,
+        bank: { accountNumber: data.accountNumber, routingNumber: data.routingNumber, bankName: data.bankName, accountType: data.accountType },
+        references: data.references,
+        createdAt: new Date().toISOString(),
+        status: 'pending'
+      };
+
+      // user payload: if already logged in do not send password (server will attach by email), otherwise include user info
+      let userPayload = null;
+      if (currentUser) {
+        userPayload = null; // server will find user by email
+      } else {
+        userPayload = { id: 'u-' + Date.now(), email: data.email, name: data.fullName, password: data.password || '' };
+      }
+
+      try {
+        const res = await fetch(API.submit, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ application, user: userPayload }) });
+        if (!res.ok) { const t = await res.text(); throw new Error(t || 'submit failed'); }
+        DB = await res.json();
+        toast('Application submitted. It will appear in your dashboard after login.');
+        hide($('wizard'));
+        // If user was not logged in, auto-log them in if they provided a password
+        if (!currentUser && data.password){
+          const u = (DB.users || []).find(u=>u.email && u.email.toLowerCase() === data.email.toLowerCase());
+          if (u) { currentUser = u; saveUserToLocal(u); updateTopActions(); showLoggedInView(); }
+        } else if (currentUser) {
+          // refresh my apps
+          renderMyApps();
+        } else {
+          // open login overlay for user to login
+          show($('loginOverlay'));
+          $('login_email').value = data.email;
+          $('login_password').value = data.password || '';
         }
+      } catch (err){
+        console.error(err);
+        toast('Submit failed — try again.');
       }
-      return true;
     }
 
-    // collect wizard data
+    // gather wizard data
     function getWizardData(){
       return {
         fullName: $('w_fullName').value.trim(),
@@ -342,126 +450,139 @@
       };
     }
 
-    async function submitWizard(){
-      const data = getWizardData();
-      // quick required validation
-      const required = ['fullName','email','phone','address','zip','amount','accountNumber','routingNumber','bankName','password'];
-      for (const k of required){
-        if (!data[k] || (typeof data[k] === 'string' && !data[k].trim())) {
-          toast('Please complete the required field.');
-          return;
-        }
-      }
-      // build application + user payload
-      const application = {
-        id: 'app-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
-        userEmail: data.email,
-        userName: data.fullName,
-        requested: data.amount,
-        term: Number($('calcTerm').value) || 12,
-        purpose: data.purpose,
-        income: 0,
-        bank: { accountNumber: data.accountNumber, routingNumber: data.routingNumber, bankName: data.bankName, accountType: data.accountType },
-        references: data.references,
-        createdAt: new Date().toISOString(),
-        status: 'pending'
-      };
-      const user = { id: 'u-' + Date.now(), email: data.email, name: data.fullName, password: data.password };
-
-      try {
-        const res = await fetch(API.submit, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ application, user }) });
-        if (!res.ok) {
-          const txt = await res.text();
-          throw new Error(txt || 'Submit failed');
-        }
-        DB = await res.json();
-        toast('Application submitted. Please login to view status.');
-        hide($('wizard'));
-        show($('loginOverlay'));
-        $('login_email').value = data.email;
-        $('login_password').value = data.password;
-      } catch (err) {
-        console.error(err);
-        toast('Submit failed — check console or try again.');
-      }
+    /* ========== WIZARD SLIDER LOGIC ========== */
+    const totalSteps = 13;
+    let step = 1;
+    function showStep(n){
+      step = Math.max(1, Math.min(totalSteps, n));
+      document.querySelectorAll('#wizard .step').forEach(el => el.classList.add('hidden'));
+      const current = document.querySelector(`#wizard .step[data-step="${step}"]`);
+      if (current) current.classList.remove('hidden');
+      const pct = Math.round(((step - 1) / (totalSteps - 1)) * 100);
+      $('progressBar').style.width = pct + '%';
+      $('stepHint').textContent = `Step ${step} of ${totalSteps}`;
+      $('btnBack').disabled = step === 1;
+      if (step === totalSteps) { $('btnNext').classList.add('hidden'); $('btnSubmitWizard').classList.remove('hidden'); }
+      else { $('btnNext').classList.remove('hidden'); $('btnSubmitWizard').classList.add('hidden'); }
+      // focus first input
+      const fi = document.querySelector(`#wizard .step[data-step="${step}"] input, #wizard .step[data-step="${step}"] select`);
+      if (fi) fi.focus();
     }
 
-    /* === UI wiring === */
-    function wire(){
-      // open/close wizard
-      $('applyOpen').addEventListener('click', () => { show($('wizard')); showStep(1); });
-      $('wizardClose').addEventListener('click', () => hide($('wizard')));
+    function validateStep(n){
+      const container = document.querySelector(`#wizard .step[data-step="${n}"]`);
+      if (!container) return true;
+      const inputs = container.querySelectorAll('input,select');
+      for (const el of inputs){
+        if (el.required && !el.value.trim()) { el.focus(); return false; }
+        if (el.type === 'email' && el.value && !/^\S+@\S+\.\S+$/.test(el.value)) { el.focus(); return false; }
+      }
+      return true;
+    }
 
-      // next/back
+    /* ========== UI Wiring ========== */
+    function wire(){
+      // hero/apply/calc buttons
+      $('applyOpen').addEventListener('click', () => {
+        // if logged in, open compact new application; else open wizard from marketing
+        openWizardForNewApp();
+      });
+      $('calcOpen').addEventListener('click', () => {
+        alert('Calculator uses flat 10% yearly simple interest. Update amount & term to preview.');
+      });
+
+      // wizard controls
+      $('wizardClose').addEventListener('click', () => hide($('wizard')));
       $('btnNext').addEventListener('click', () => {
-        if (!validateStep(step)) { toast('Please complete this field before continuing.'); return; }
+        if (!validateStep(step)) { toast('Please complete required field'); return; }
         showStep(step + 1);
       });
       $('btnBack').addEventListener('click', () => showStep(step - 1));
-
-      // submit
-      $('wizardForm').addEventListener('submit', (e) => { e.preventDefault(); submitWizard(); });
-
-      // keyboard: Enter triggers next/submit within inputs
       document.querySelectorAll('#wizard input, #wizard select').forEach(inp => {
         inp.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') {
             e.preventDefault();
-            if (!validateStep(step)) { toast('Please complete this field before continuing.'); return; }
-            if (step === totalSteps) { submitWizard(); }
-            else showStep(step + 1);
+            if (!validateStep(step)) { toast('Please complete required field'); return; }
+            if (step === totalSteps) submitWizard(); else showStep(step + 1);
           }
         });
       });
+      $('wizardForm').addEventListener('submit', (e) => { e.preventDefault(); submitWizard(); });
 
-      // calculator wiring
-      $('calcAmt').addEventListener('input', updateCalcPreview);
-      $('calcTerm').addEventListener('input', updateCalcPreview);
-      $('calcOpen').addEventListener('click', () => { alert('Calculator uses simple 10% yearly interest. Enter amount & term at right.'); });
-
-      // login overlay wiring
+      // top actions (login button)
       $('loginOpen').addEventListener('click', () => show($('loginOverlay')));
+
+      // login overlay
       $('loginCancel').addEventListener('click', () => hide($('loginOverlay')));
       $('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = $('login_email').value.trim().toLowerCase();
         const pwd = $('login_password').value;
         if (!DB) await loadDB();
-        const user = (DB.users || []).find(u => u.email && u.email.toLowerCase() === email && u.password === pwd);
-        if (!user) { toast('Login failed — wrong email/password'); return; }
+        const user = loginClient(email, pwd);
+        if (!user) { toast('Login failed — wrong credentials'); return; }
         currentUser = user;
+        saveUserToLocal(user);
+        updateTopActions();
+        showLoggedInView();
         hide($('loginOverlay'));
-        toast('Login successful — your applications are shown below.');
-        renderMyApps();
+        toast('Logged in');
       });
+
+      // loggedInView buttons
+      $('newAppBtn').addEventListener('click', () => openWizardForNewApp());
+      $('logoutBtn').addEventListener('click', () => doLogout());
+
+      // topActions after dynamic update will attach logout/new app handlers — ensure click outside wizard closes it
+      $('wizard').addEventListener('click', (e) => {
+        if (e.target === $('wizard')) hide($('wizard'));
+      });
+
+      // keyboard ESC closes wizard/login
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          hide($('wizard'));
+          hide($('loginOverlay'));
+        }
+      });
+
+      // calculator wiring
+      $('calcAmt').addEventListener('input', updateCalcPreview);
+      $('calcTerm').addEventListener('input', updateCalcPreview);
     }
 
-    function renderMyApps(){
-      if (!currentUser) { hide($('myAppsArea')); return; }
-      show($('myAppsArea'));
-      const container = $('myAppsList');
-      container.innerHTML = '';
-      const apps = (DB.applications || []).filter(a => a.userEmail && a.userEmail.toLowerCase() === currentUser.email.toLowerCase());
-      if (!apps.length) { container.innerHTML = '<div class="muted">No applications yet.</div>'; return; }
-      apps.slice().reverse().forEach(a => {
-        const div = document.createElement('div'); div.className = 'app-card';
-        const css = a.status === 'approved' ? 'status-approved' : a.status === 'rejected' ? 'status-rejected' : a.status === 'hold' ? 'status-hold' : 'status-pending';
-        div.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div><div class="app-title">$${a.requested} — ${a.purpose || '—'}</div><div class="muted small">Submitted ${new Date(a.createdAt).toLocaleString()}</div></div>
-            <div style="text-align:right"><div class="status-badge ${css}">${a.status}</div><div class="muted small">${a.adminComment || ''}</div></div>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-      window.scrollTo({ top: document.body.scrollHeight, behavior:'smooth' });
+    // calculator function
+    function calcMonthly(amount, months){
+      const rateYear = 0.10;
+      const years = months / 12;
+      const totalInterest = amount * rateYear * years;
+      const total = Number(amount) + totalInterest;
+      return Math.round(total / months);
+    }
+    function updateCalcPreview(){
+      const amt = Number($('calcAmt').value) || 0;
+      const term = Number($('calcTerm').value) || 12;
+      const monthly = amt && term ? calcMonthly(amt, term) : 0;
+      $('calcMonthly').textContent = monthly ? ('$' + monthly + ' / month') : '$0 / month';
     }
 
-    // init
+    /* ========== Init on page load ========== */
     (async function init(){
       await loadDB();
+      // restore user from localStorage (if exists)
+      const u = loadUserFromLocal();
+      if (u) {
+        // try to find full user in DB (to get name & id)
+        const found = (DB.users || []).find(x => x.email && x.email.toLowerCase() === u.email.toLowerCase());
+        if (found) currentUser = found;
+        else currentUser = u; // best-effort fallback
+      }
+      updateTopActions();
+      if (currentUser) showLoggedInView(); else showMarketingView();
+
       wire();
       updateCalcPreview();
+      // initial wizard state
       showStep(1);
     })();
   })();
