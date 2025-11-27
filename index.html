@@ -3,225 +3,287 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Loan Club — Apply</title>
+  <title>Loan Club — Fast Personal Loans</title>
+
+  <!-- Google font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css" />
+  <meta name="description" content="Loan Club — fast and friendly loans. Apply online in minutes and track your status." />
 </head>
 <body>
-  <header class="header">
-    <div class="brand">
-      <div class="logo">LC</div>
-      <div class="brand-name">Loan Club</div>
+  <header class="header header-elevated">
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="logo">LC</div>
+        <div class="brand-text">
+          <div class="brand-name">Loan Club</div>
+          <div class="brand-tag">Fast • Clear • Trustworthy</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="nav-link" href="#how">How it works</a>
+        <a class="nav-link" href="#apply">Apply</a>
+        <a class="btn btn-ghost" href="/admin.html" title="Admin (do not share)">Admin</a>
+      </nav>
     </div>
-    <nav class="nav-right">
-      <button id="btn-view-login" class="btn btn-ghost">Login / Signup</button>
-      <a href="/admin.html" class="admin-link" title="Admin (separate)">Admin →</a>
-    </nav>
   </header>
 
   <main class="container">
-    <section class="hero card">
+    <!-- HERO -->
+    <section class="hero card hero-compact">
       <div class="hero-left">
-        <h1>Loans made simple</h1>
-        <p class="muted">Fast online applications, clear status tracking.</p>
-        <div class="row">
-          <button id="btn-start" class="btn btn-primary">Apply Now</button>
-          <button id="btn-export" class="btn btn-outline">Export Data</button>
+        <h1>Quick loans with clear terms</h1>
+        <p class="lead">Apply online in minutes. Transparent pricing, rapid review — funds shown in your dashboard if approved.</p>
+        <div class="hero-ctas">
+          <button id="ctaApply" class="btn btn-primary">Apply Now</button>
+          <button id="ctaCalculator" class="btn btn-outline">Loan Calculator</button>
         </div>
+
+        <ul class="trust-list">
+          <li>✅ Soft credit check</li>
+          <li>🔒 Data encrypted</li>
+          <li>💬 Support 9am–6pm</li>
+        </ul>
       </div>
+
       <div class="hero-right">
-        <div class="kpi">
-          <div class="kpi-number">Demo</div>
-          <div class="kpi-label">Loan Club</div>
+        <div class="card small-card calc-preview">
+          <div class="muted">Estimate monthly</div>
+          <div id="calcPreview" class="calc-amount">$0 / month</div>
+          <div class="muted small">Use our calculator before applying</div>
+        </div>
+        <div class="card small-card stats">
+          <div class="stat"><div class="stat-num">98%</div><div class="stat-label">Demo Approvals</div></div>
+          <div class="stat"><div class="stat-num">~10 min</div><div class="stat-label">Apply time</div></div>
         </div>
       </div>
     </section>
 
-    <section id="auth" class="card hidden">
-      <h2 id="auth-title">Login</h2>
-      <form id="auth-form" class="form-grid" autocomplete="off">
-        <input id="name" placeholder="Full name (signup only)" />
-        <input id="email" placeholder="Email" required />
-        <input id="password" type="password" placeholder="Password" required />
-        <div class="row" style="margin-top:8px">
-          <button type="submit" class="btn btn-primary" id="auth-submit">Login</button>
-          <button id="auth-switch" type="button" class="btn btn-ghost">Switch to Signup</button>
-        </div>
-      </form>
-      <div id="auth-msg" class="muted"></div>
+    <!-- HOW IT WORKS -->
+    <section id="how" class="card">
+      <h2>How Loan Club works</h2>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div><strong>Apply online</strong><div class="muted">Fill a short form — takes minutes.</div></div></div>
+        <div class="step"><div class="step-num">2</div><div><strong>We review</strong><div class="muted">Admin reviews and decides quickly.</div></div></div>
+        <div class="step"><div class="step-num">3</div><div><strong>Get funds</strong><div class="muted">If approved, amount shows in your dashboard.</div></div></div>
+      </div>
     </section>
 
-    <section id="dashboard" class="card hidden">
-      <div class="dash-top row" style="justify-content:space-between;align-items:center">
-        <h2>Your Applications</h2>
-        <div id="user-info" class="muted"></div>
+    <!-- APPLY -->
+    <section id="apply" class="card">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <h2>Start your application</h2>
+        <div class="muted small">Only a few fields to begin</div>
       </div>
 
-      <div id="apply-card" class="card small">
-        <h3>Apply for Loan</h3>
-        <form id="loan-form" class="form-grid">
-          <input id="loan-amount" placeholder="Loan amount (USD)" required />
-          <input id="loan-term" placeholder="Term (months)" />
-          <input id="loan-purpose" placeholder="Purpose" />
-          <input id="loan-income" placeholder="Annual income" />
-          <div class="row" style="justify-content:flex-end">
+      <form id="loanForm" class="form-grid" autocomplete="off">
+        <!-- Step 1: Basic -->
+        <div class="form-step">
+          <label>Full name <input id="fullName" type="text" placeholder="John Doe" required /></label>
+          <label>Email <input id="email" type="email" placeholder="you@example.com" required /></label>
+          <label>Phone <input id="phone" type="tel" placeholder="+1 555 444 3333" /></label>
+        </div>
+
+        <!-- Step 2: Loan -->
+        <div class="form-step">
+          <label>Loan amount (USD) <input id="amount" type="number" min="100" step="50" placeholder="5000" required /></label>
+          <label>Term (months) <input id="term" type="number" min="1" max="60" placeholder="12" required /></label>
+          <label>Purpose <input id="purpose" type="text" placeholder="Home repairs, business, etc." /></label>
+        </div>
+
+        <!-- Step 3: Income -->
+        <div class="form-step">
+          <label>Annual income (USD) <input id="income" type="number" min="0" placeholder="45000" /></label>
+          <label>Employer <input id="employer" type="text" placeholder="Company name (optional)" /></label>
+        </div>
+
+        <div class="form-actions">
+          <div class="muted small" id="formHint">We’ll only use this to evaluate your application.</div>
+          <div class="row">
+            <button type="button" id="btnCalculate" class="btn btn-outline">Estimate</button>
             <button type="submit" class="btn btn-primary">Submit Application</button>
           </div>
-        </form>
-      </div>
-
-      <div id="applications-list" class="list"></div>
+        </div>
+      </form>
     </section>
+
+    <!-- APPLICATION STATUS LIST (customer) -->
+    <section id="myApplications" class="card">
+      <h3>Your applications</h3>
+      <div id="applicationsList" class="list">
+        <div class="muted">Login or signup to view applications (demo behavior).</div>
+      </div>
+    </section>
+
   </main>
 
+  <!-- toast -->
+  <div id="toast" class="toast hidden"></div>
+
   <script>
-  // inline app.js — customer logic (no modals)
-  const API = { load: '/api/load', submit: '/api/submit' };
-  let DB = null;
-  let currentUser = null;
+  // Inline JS — keeps repo small. This is the user-facing UI behavior.
+  (function() {
+    const API = { load: '/api/load', submit: '/api/submit' };
+    let DB = null;
+    let currentUser = null; // demo local signup
 
-  // helpers
-  const uid = (p='u') => p + '-' + Math.random().toString(36).slice(2,9);
-  const byId = id => document.getElementById(id);
-
-  // load DB
-  async function loadData() {
-    const res = await fetch(API.load);
-    if (!res.ok) throw new Error('Load failed');
-    DB = await res.json();
-    renderAll();
-  }
-
-  // submit application (server appends)
-  async function submitApplication(app) {
-    const res = await fetch(API.submit, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ application: app })
-    });
-    if (!res.ok) {
-      const t = await res.text();
-      throw new Error(t || 'Submit failed');
-    }
-    DB = await res.json();
-    renderAll();
-  }
-
-  // render
-  function renderAll() {
-    if (!DB) return;
-    renderApplications();
-  }
-  function renderApplications() {
-    const list = byId('applications-list');
-    list.innerHTML = '';
-    if (!currentUser) {
-      list.innerHTML = '<div class="muted">Please login to view your applications.</div>';
-      return;
-    }
-    const apps = DB.applications.filter(a => a.userId === currentUser.id);
-    if (!apps.length) list.innerHTML = '<div class="muted">No applications yet.</div>';
-    apps.forEach(a => {
-      const d = document.createElement('div');
-      d.className = 'app-card';
-      const statusCls = a.status === 'approved' ? 'status-approved' : a.status === 'rejected' ? 'status-rejected' : a.status === 'hold' ? 'status-hold' : 'status-pending';
-      d.innerHTML = `
-        <div style="display:flex;justify-content:space-between">
-          <div><strong>Requested: $${a.requested}</strong><div class="muted">Purpose: ${a.purpose||'—'}</div></div>
-          <div><span class="status-badge ${statusCls}">${a.status}</span></div>
-        </div>
-        <div class="muted" style="margin-top:8px">Admin comment: ${a.adminComment||'—'}</div>
-      `;
-      if (a.status === 'approved' && !a.withdrawalRequested) {
-        const btn = document.createElement('button');
-        btn.className = 'btn';
-        btn.innerText = 'Withdraw (simulate)';
-        btn.onclick = () => {
-          const ok = confirm(`Request withdrawal for $${a.requested}?`);
-          if (!ok) return;
-          a.withdrawalRequested = true;
-          a.withdrawalAt = new Date().toISOString();
-          alert('Withdrawal requested. Admin will process it in the admin dashboard.');
-          renderAll();
-        };
-        d.appendChild(btn);
-      }
-      list.appendChild(d);
-    });
-  }
-
-  // auth & forms
-  function setupAuth(){
-    byId('btn-start').onclick = () => { byId('hero')?.classList?.add?.('hidden'); byId('auth').classList.remove('hidden'); };
-    let signup = false;
-    byId('auth-switch').onclick = () => {
-      signup = !signup;
-      byId('auth-title').innerText = signup ? 'Signup' : 'Login';
-      byId('auth-submit').innerText = signup ? 'Signup' : 'Login';
-      byId('name').style.display = signup ? 'block' : 'none';
+    /* helpers */
+    const byId = id => document.getElementById(id);
+    const toast = msg => {
+      const t = byId('toast');
+      t.textContent = msg;
+      t.classList.remove('hidden');
+      t.classList.add('show');
+      setTimeout(()=> { t.classList.remove('show'); setTimeout(()=> t.classList.add('hidden'), 300); }, 3000);
     };
-    byId('auth-form').onsubmit = async e => {
-      e.preventDefault();
-      const email = byId('email').value.trim();
-      const pass = byId('password').value.trim();
-      const name = byId('name').value.trim() || email;
-      if (signup) {
-        if (DB.users.find(u => u.email === email)) { byId('auth-msg').innerText = 'Email exists'; return; }
-        const id = uid('u');
-        const u = { id, email, name, role:'user', password: pass };
-        DB.users.push(u);
-        currentUser = u;
-        alert('Signed up locally. Export data to persist, or ask admin to import.');
-        showDashboard();
-      } else {
-        const found = DB.users.find(u => u.email === email && u.password === pass);
-        if (!found) { byId('auth-msg').innerText = 'Wrong credentials'; return; }
-        currentUser = found;
-        showDashboard();
-      }
-    };
-  }
-  function showDashboard(){
-    byId('auth').classList.add('hidden');
-    byId('dashboard').classList.remove('hidden');
-    byId('user-info').innerText = `${currentUser.name} (${currentUser.email})`;
-  }
+    const uid = (p='u') => p + '-' + Math.random().toString(36).slice(2,9);
 
-  function setupLoanForm(){
-    byId('loan-form').onsubmit = async e => {
-      e.preventDefault();
-      if (!currentUser) return alert('Please login');
-      const requested = byId('loan-amount').value.trim();
-      const purpose = byId('loan-purpose').value.trim();
-      const term = byId('loan-term').value.trim();
-      const income = byId('loan-income').value.trim();
-      const app = { id: uid('app'), userId: currentUser.id, userName: currentUser.name, requested, term, purpose, income, status:'pending' };
+    /* load DB */
+    async function loadDB() {
       try {
-        await submitApplication(app);
-        byId('loan-form').reset();
-        alert(`Your application for $${requested} was submitted.`);
+        const res = await fetch(API.load);
+        if (!res.ok) throw new Error('Load failed');
+        DB = await res.json();
+        renderApplications();
       } catch (err) {
-        alert('Submit failed: ' + (err.message || err));
+        DB = { users: [{ id:'admin-1', email:'admin@loanclub.local', name:'Admin', role:'admin', password:'Admin@123'}], applications: [] };
+        console.warn('Using local demo DB', err);
       }
-    };
-  }
+    }
 
-  function setupExport(){
-    byId('btn-export').onclick = () => {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([JSON.stringify(DB, null, 2)], {type:'application/json'}));
-      a.download = 'loanclub-data.json';
-      a.click();
-    };
-  }
+    /* calculate monthly (simple interest flat for demo) */
+    function estimateMonthly(amount, term, rate=0.12) {
+      // approximate monthly payment with fixed interest (annuity formula)
+      if(!amount || !term) return 0;
+      const monthlyRate = rate / 12;
+      const n = term;
+      const p = amount * (monthlyRate / (1 - Math.pow(1 + monthlyRate, -n)));
+      return Math.round(p);
+    }
 
-  // wire
-  (async function(){
-    setupAuth();
-    setupLoanForm();
-    setupExport();
-    document.getElementById('btn-view-login').onclick = () => document.getElementById('auth').classList.toggle('hidden');
-    try { await loadData(); } catch(e) { DB = {meta:{brand:'Loan Club'}, users:[{id:'admin-1',email:'admin@loanclub.local',name:'Admin',role:'admin',password:'Admin@123'}], applications:[]}; renderAll(); }
+    /* recalc preview */
+    function updateCalculatorPreview() {
+      const amt = Number(byId('amount').value) || 0;
+      const term = Number(byId('term').value) || 12;
+      const monthly = estimateMonthly(amt, term);
+      byId('calcPreview').textContent = monthly ? ('$' + monthly + ' / month') : '$0 / month';
+    }
+
+    /* render applications (simple view for signed-in demo user) */
+    function renderApplications() {
+      const el = byId('applicationsList');
+      el.innerHTML = '';
+      if (!DB || !DB.applications || DB.applications.length === 0) {
+        el.innerHTML = '<div class="muted">No applications yet — submit above to start.</div>';
+        return;
+      }
+      // show latest first
+      DB.applications.slice().reverse().forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'app-card';
+        const statusCls = a.status === 'approved' ? 'status-approved' : a.status === 'rejected' ? 'status-rejected' : a.status === 'hold' ? 'status-hold' : 'status-pending';
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="app-title">$${a.requested} — ${a.purpose || '—'}</div>
+              <div class="muted small">Submitted ${new Date(a.createdAt).toLocaleString()}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="status-badge ${statusCls}">${a.status}</div>
+              <div class="muted small">${a.adminComment ? a.adminComment : ''}</div>
+            </div>
+          </div>
+        `;
+        el.appendChild(card);
+      });
+    }
+
+    /* submit application to server (append-only) */
+    async function submitApplication(obj) {
+      try {
+        const res = await fetch(API.submit, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ application: obj })
+        });
+        if (!res.ok) {
+          const txt = await res.text(); throw new Error(txt || 'submit failed');
+        }
+        DB = await res.json();
+        renderApplications();
+        toast('Application submitted — we will review it shortly.');
+      } catch (err) {
+        console.error(err);
+        toast('Submit failed. Check console/logs.');
+      }
+    }
+
+    /* form handling with lightweight validation */
+    function setupForm() {
+      const form = byId('loanForm');
+      form.addEventListener('input', updateCalculatorPreview);
+      byId('btnCalculate').addEventListener('click', () => {
+        updateCalculatorPreview();
+        toast('Estimated monthly updated.');
+      });
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        // simple validation
+        const name = byId('fullName').value.trim();
+        const email = byId('email').value.trim();
+        const amount = Number(byId('amount').value);
+        const term = Number(byId('term').value);
+        if (!name || !email || !amount || !term) {
+          toast('Please fill required fields: name, email, amount, term.');
+          return;
+        }
+        // create demo user if not exists
+        let user = DB.users && DB.users.find(u => u.email === email);
+        if (!user) {
+          user = { id: uid('u'), email, name, role: 'user', password: 'demo' };
+          // for safety in this demo we add locally; admin may import to persist
+          DB.users = DB.users || [];
+          DB.users.push(user);
+        }
+        const app = {
+          id: uid('app'),
+          userId: user.id,
+          userName: user.name,
+          requested: amount,
+          term,
+          purpose: byId('purpose').value.trim(),
+          income: Number(byId('income').value) || 0,
+          createdAt: new Date().toISOString(),
+          status: 'pending'
+        };
+        // submit to server
+        submitApplication(app);
+        form.reset();
+        updateCalculatorPreview();
+      });
+    }
+
+    /* wire CTA */
+    byId('ctaApply').addEventListener('click', () => {
+      document.querySelector('#auth')?.scrollIntoView({behavior:'smooth'});
+      document.getElementById('auth')?.classList.remove('hidden');
+    });
+    byId('ctaCalculator').addEventListener('click', () => {
+      const amt = Number(prompt('Loan amount (USD)', '5000'));
+      const term = Number(prompt('Term in months', '12'));
+      if (!amt || !term) return;
+      const monthly = estimateMonthly(amt, term);
+      alert(`Estimated monthly payment: $${monthly} / month (demo estimate)`);
+    });
+
+    /* init */
+    (async function init() {
+      await loadDB();
+      setupForm();
+      updateCalculatorPreview();
+    })();
   })();
   </script>
 </body>
