@@ -17,6 +17,13 @@
       "name": "test",
       "role": "user",
       "password": "test"
+    },
+    {
+      "id": "u-1764234667335",
+      "email": "test@mail.us",
+      "name": "test",
+      "role": "user",
+      "password": "test@mail.us"
     }
   ],
   "applications": [
@@ -39,6 +46,24 @@
       "status": "approved",
       "adminComment": "approved",
       "adminAt": "2025-11-27T08:41:29.492Z"
+    },
+    {
+      "id": "app-1764234667335-ab19",
+      "userEmail": "test@mail.us",
+      "userName": "test",
+      "requested": 23454,
+      "term": 60,
+      "purpose": "wresfgvhbnbv",
+      "income": 0,
+      "bank": {
+        "accountNumber": "34567834",
+        "routingNumber": "234567823",
+        "bankName": "asdxfcvbn",
+        "accountType": "Checking"
+      },
+      "references": "sdfgcvb",
+      "createdAt": "2025-11-27T09:11:07.335Z",
+      "status": "pending"
     }
   ]
 }
