@@ -1,15 +1,14 @@
-// api/save.js (hardened) — require ADMIN_PASS in header 'x-admin-pass'
+// api/save.js (protected by ADMIN_PASS env var)
 export default async function handler(req, res) {
   try {
     if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
-    // --- AUTH CHECK ---
+    // AUTH CHECK: require ADMIN_PASS header
     const ADMIN_PASS = process.env.ADMIN_PASS || '';
     const provided = (req.headers['x-admin-pass'] || req.headers['x-admin-password'] || '').toString();
     if (!ADMIN_PASS || provided !== ADMIN_PASS) {
       return res.status(401).json({ error: 'Unauthorized: missing or invalid admin pass' });
     }
-    // --- END AUTH CHECK ---
 
     const repo = process.env.GITHUB_REPO;
     const branch = process.env.GITHUB_BRANCH || 'main';
