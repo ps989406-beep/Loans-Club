@@ -1,59 +1,84 @@
 // api/submit.js
-// Simple Vercel/Netlify-style serverless handler that accepts
-// { application, user } and writes them into data.json (root).
+// Serverless handler that writes incoming { application, user } into data.json
+// by committing to the GitHub repository using the GitHub Contents API.
 //
-// WARNING: This is a demo implementation. Protect this endpoint
-// in production (auth/validation/encryption) before storing real PII.
+// Required env:
+//   GITHUB_TOKEN  - personal access token with repo permissions
+// Optionally change OWNER / REPO / BRANCH / FILE_PATH to match your setup.
 
-const fs = require('fs');
-const path = require('path');
+const fetch = global.fetch || require('node-fetch');
 
-const DATA_PATH = path.join(__dirname, '..', 'data.json'); // adjust if your data.json is elsewhere
+const OWNER = 'ps989406-beep';
+const REPO = 'Loans-Club';
+const FILE_PATH = 'data.json';
+const BRANCH = 'main'; // change if your default branch is different
 
-function sendJson(res, status, payload){
+function jsonResponse(res, status, payload) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify(payload));
 }
 
-module.exports = (req, res) => {
-  if (req.method !== 'POST') return sendJson(res, 405, { error: 'Method not allowed' });
+module.exports = async (req, res) => {
+  if (req.method !== 'POST') {
+    return jsonResponse(res, 405, { error: 'Method not allowed' });
+  }
+
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) return jsonResponse(res, 500, { error: 'GITHUB_TOKEN not set on server' });
 
   let body = '';
-  req.on('data', chunk => body += chunk);
-  req.on('end', () => {
+  req.on('data', c => body += c);
+  req.on('end', async () => {
     try {
       const payload = body ? JSON.parse(body) : {};
       const application = payload.application;
       const user = payload.user;
 
       if (!application || typeof application !== 'object') {
-        return sendJson(res, 400, { error: 'Missing application object' });
+        return jsonResponse(res, 400, { error: 'Missing application object' });
       }
 
-      // Ensure data.json exists; create minimal structure if missing
+      // 1) GET current file (to obtain sha) - if exists read and parse, otherwise create base
+      const fileUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(FILE_PATH)}?ref=${encodeURIComponent(BRANCH)}`;
+      const getResp = await fetch(fileUrl, {
+        headers: { Authorization: `token ${token}`, 'User-Agent': 'LoanClub-Server' }
+      });
+
       let data = { users: [], applications: [] };
-      if (fs.existsSync(DATA_PATH)) {
-        const raw = fs.readFileSync(DATA_PATH, 'utf8');
-        try { data = JSON.parse(raw); } catch (e) { /* fall back to empty */ }
+      let sha = null;
+
+      if (getResp.status === 200) {
+        const info = await getResp.json();
+        sha = info.sha;
+        const content = Buffer.from(info.content, info.encoding).toString('utf8');
+        try {
+          data = JSON.parse(content);
+        } catch (e) {
+          data = { users: [], applications: [] };
+        }
+      } else if (getResp.status === 404) {
+        // file doesn't exist — we'll create it
+        data = { users: [], applications: [] };
+      } else {
+        const txt = await getResp.text();
+        return jsonResponse(res, 500, { error: `GitHub read failed: ${getResp.status} ${txt}` });
       }
 
-      // If same application id already exists, replace it (id collision unlikely)
-      const idx = (data.applications || []).findIndex(a => a.id === application.id);
-      if (idx !== -1) {
-        // merge to preserve any server-side fields, but prefer incoming values
-        data.applications[idx] = Object.assign({}, data.applications[idx], application);
+      // 2) append or update application
+      data.applications = data.applications || [];
+      const existingIdx = data.applications.findIndex(a => a.id === application.id);
+      if (existingIdx !== -1) {
+        data.applications[existingIdx] = Object.assign({}, data.applications[existingIdx], application);
       } else {
-        data.applications = data.applications || [];
         data.applications.push(application);
       }
 
-      // If a user payload is provided, add that user if not already present
+      // 3) create / update user if a user payload provided
       if (user && user.email) {
         data.users = data.users || [];
         const exists = data.users.find(u => u.email && u.email.toLowerCase() === user.email.toLowerCase());
         if (!exists) {
-          // Add minimal user object; keep password as provided (demo only)
           data.users.push({
             id: user.id || ('u-' + Date.now()),
             email: user.email,
@@ -62,20 +87,42 @@ module.exports = (req, res) => {
             role: user.role || 'user'
           });
         } else {
-          // optionally update name/password if provided (keeps existing otherwise)
           if (user.name) exists.name = user.name;
           if (user.password) exists.password = user.password;
         }
       }
 
-      // write back data.json (pretty print)
-      fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2), 'utf8');
+      // 4) PUT updated file back to GitHub (contents API requires base64 content)
+      const newContent = Buffer.from(JSON.stringify(data, null, 2)).toString('base64');
 
-      // return updated db
-      return sendJson(res, 200, data);
+      const commitBody = {
+        message: existingIdx !== -1 ? `Update application ${application.id}` : `Add application ${application.id}`,
+        content: newContent,
+        branch: BRANCH
+      };
+      if (sha) commitBody.sha = sha;
+
+      const putUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(FILE_PATH)}`;
+      const putResp = await fetch(putUrl, {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${token}`,
+          'User-Agent': 'LoanClub-Server',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(commitBody)
+      });
+
+      if (!putResp.ok) {
+        const txt = await putResp.text();
+        return jsonResponse(res, 500, { error: `GitHub write failed: ${putResp.status} ${txt}` });
+      }
+
+      // 5) return the updated data object (we already have it)
+      return jsonResponse(res, 200, data);
     } catch (err) {
       console.error('api/submit error', err);
-      return sendJson(res, 500, { error: String(err) });
+      return jsonResponse(res, 500, { error: String(err) });
     }
   });
 };
