@@ -6,9 +6,7 @@ export default async function handler(req, res) {
     const path = 'data.json';
     const url = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(path)}?ref=${branch}`;
     const token = process.env.GITHUB_TOKEN;
-    const r = await fetch(url, {
-      headers: { 'User-Agent': 'loanclub-demo', 'Authorization': `token ${token}` }
-    });
+    const r = await fetch(url, { headers: { 'User-Agent': 'loanclub-demo', 'Authorization': `token ${token}` } });
     if (!r.ok) {
       const txt = await r.text();
       return res.status(500).json({ error: 'Could not load data.json', status: r.status, text: txt });
