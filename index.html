@@ -518,11 +518,61 @@
       $('loginCancel').addEventListener('click', () => hide($('loginOverlay')));
 
       // login submit (robust: refresh DB first)
-      $('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = $('login_email').value.trim().toLowerCase();
-        const pwd = $('login_password').value;
-        if (!email || !pwd) { toast('Please enter email and password.'); return; }
+      // Robust login handler — REPLACE your current loginForm submit listener with this block
+$('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = $('login_email').value.trim().toLowerCase();
+  const pwd = $('login_password').value;
+
+  if (!email || !pwd) {
+    toast('Please enter both email and password.');
+    return;
+  }
+
+  // 1) Force-refresh DB from server so we have the latest users
+  try {
+    const r = await fetch('/api/load', { cache: 'no-store' });
+    if (!r.ok) {
+      console.warn('api/load returned non-OK:', r.status);
+      // try to keep existing DB if present
+    } else {
+      try { DB = await r.json(); } catch (err) { console.error('Failed parsing /api/load JSON', err); }
+    }
+  } catch (err) {
+    console.warn('Fetch /api/load failed:', err);
+  }
+
+  // 2) Debug: print users known to client (open console to inspect)
+  console.log('Client-side DB.users:', DB && DB.users ? DB.users : '(no users array)');
+
+  // 3) Find user (case-insensitive email match)
+  const users = (DB && DB.users) ? DB.users : [];
+  const found = users.find(u => u.email && u.email.toLowerCase() === email);
+
+  if (!found) {
+    toast('Account not found. You can create one by submitting an application.');
+    return;
+  }
+
+  // 4) Check password (demo: plaintext). Provide helpful message if mismatch.
+  if (found.password !== pwd) {
+    // Security note: demo uses plaintext passwords in data.json. For production use hashed passwords.
+    toast('Password is incorrect. If you forgot it, submit a new application to create an account or contact admin.');
+    return;
+  }
+
+  // 5) Success: set currentUser, persist, update UI
+  currentUser = found;
+  try { saveUserToLocal(found); } catch (err) { console.warn('Could not save user to localStorage', err); }
+  updateTopActions();
+  showLoggedInView();
+  hide($('loginOverlay'));
+  toast('Logged in — welcome back!');
+
+  // 6) Extra debug info
+  console.log('Login success, currentUser:', currentUser);
+});
+
 
         // refresh DB so recent signups are included
         try { await loadDB(); } catch (err) { console.warn('DB refresh failed before login', err); }
