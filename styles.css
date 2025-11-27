@@ -311,3 +311,51 @@ body{
   .footer-contact{ width:100%; justify-content:flex-start; }
   .contact-item{ padding:8px 10px; font-size:14px; }
 }
+/* ===== Trust badges & guarantee ribbons ===== */
+.trust-badges-row{
+  display:flex;
+  gap:12px;
+  margin-top:18px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.trust-badge{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);
+  box-shadow:var(--shadow-soft);
+  min-width:200px;
+}
+.badge-icon{ flex:0 0 28px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.35); }
+.badge-text{ display:flex;flex-direction:column; }
+.badge-title{ font-weight:900; color:var(--text-light); font-size:14px; }
+.badge-sub{ color:var(--text-muted); font-size:12px; margin-top:2px; }
+
+/* Guarantee ribbons (floating) */
+.guarantee-ribbons{ position:relative; pointer-events:none; }
+.ribbon{
+  position:absolute;
+  top:-10px;
+  transform:rotate(-6deg);
+  box-shadow:0 8px 30px rgba(0,0,0,0.45);
+  border-radius:8px;
+  overflow:visible;
+  pointer-events:auto;
+}
+.ribbon-left{ left:12px; background: linear-gradient(90deg,var(--blue-neon),var(--violet-neon)); color:white; padding:8px 12px; }
+.ribbon-right{ right:12px; top:8px; transform:rotate(6deg); background: linear-gradient(90deg,var(--violet-neon),var(--pink-neon)); color:white; padding:8px 12px; }
+
+.ribbon-inner{ display:flex;flex-direction:column; align-items:flex-start; gap:2px; min-width:140px; }
+.ribbon-line{ font-weight:800; font-size:11px; opacity:0.95; color:rgba(255,255,255,0.95); }
+.ribbon-main{ font-weight:900; font-size:13px; letter-spacing:0.2px; }
+
+/* ensure ribbons sit above hero-right card but below modals */
+.hero-card .guarantee-ribbons{ z-index:30; }
+
+/* responsive adjustments */
+@media(max-width:980px){
+  .trust-badge{ min-width:160px; padding:10px; }
+  .ribbon-left, .ribbon-right{ display:none; } /* hide ribbons on small screens for clarity */
+}
