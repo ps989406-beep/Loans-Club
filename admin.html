@@ -3,153 +3,299 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Loan Club — Admin</title>
+  <title>Loan Club — Admin Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css" />
+  <style>
+    /* small admin-specific overrides */
+    body{padding:22px;background:linear-gradient(180deg,var(--bgA),var(--bgB));}
+    .admin-wrap{max-width:1200px;margin:0 auto;color:var(--text-light)}
+    .admin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .table{width:100%;border-collapse:collapse}
+    .table th, .table td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:left;font-size:14px}
+    .table th{color:var(--text-muted);font-weight:700}
+    .detail-panel{background:var(--bgCard);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);box-shadow:var(--shadow-soft)}
+    .actions{display:flex;gap:8px}
+    .admin-filter{display:flex;gap:8px;align-items:center}
+    .search{padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:#0f1726;color:var(--text-light)}
+    .status-pill{padding:6px 10px;border-radius:999px;font-weight:800;font-size:13px}
+    .status-pending{background:#4c4c12;color:#fff}
+    .status-approved{background:#0e5d32;color:white}
+    .status-rejected{background:#8c1a32;color:white}
+    .status-hold{background:#28306d;color:white}
+    .modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); }
+    .modal-card { width:100%; max-width:900px; border-radius:12px; padding:18px; background: linear-gradient(180deg,#0f1726,#081323); border:1px solid rgba(255,255,255,0.06); box-shadow: var(--shadow-strong); color:var(--text-light) }
+    .field-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+    .field{flex:1;min-width:180px}
+    .muted-small{color:var(--text-muted);font-size:13px}
+    .comment-box{width:100%;height:90px;padding:10px;border-radius:8px;background:#07101b;border:1px solid rgba(255,255,255,0.06);color:var(--text-light)}
+  </style>
 </head>
 <body>
-  <header class="header">
-    <div class="brand">
-      <div class="logo">LC</div>
-      <div class="brand-name">Loan Club — Admin</div>
+  <div class="admin-wrap">
+    <div class="admin-header">
+      <div>
+        <h1 style="margin:0">Loan Club — Admin</h1>
+        <div class="muted-small">View and manage loan applications</div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="admin-filter">
+          <select id="filterStatus" class="search">
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="hold">Hold</option>
+          </select>
+          <input id="searchQ" placeholder="Search name or email or id" class="search" />
+        </div>
+        <button id="refreshBtn" class="btn btn-outline">Refresh</button>
+      </div>
     </div>
-  </header>
 
-  <main class="container">
-    <section class="card">
-      <h2>Admin Login</h2>
-      <p class="muted">Enter admin password (Vercel `ADMIN_PASS`).</p>
-      <div class="row" style="margin-top:10px">
-        <input id="admin-pass" placeholder="Admin password" />
-        <button id="btn-admin-login" class="btn btn-primary">Login</button>
-      </div>
-    </section>
+    <div id="listWrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Applicant</th>
+            <th>Amount</th>
+            <th>Term</th>
+            <th>Submitted</th>
+            <th>Status</th>
+            <th style="width:160px">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="appsTbody"></tbody>
+      </table>
+    </div>
 
-    <section id="admin-panel" class="card hidden">
-      <div class="row" style="justify-content:space-between;align-items:center">
-        <h2>Applications</h2>
+    <div id="empty" class="muted-small" style="margin-top:12px"></div>
+  </div>
+
+  <!-- Detail modal -->
+  <div id="detailModal" class="modal hidden" style="z-index:2000">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <div>
-          <button id="btn-refresh" class="btn">Refresh</button>
-          <button id="btn-export-admin" class="btn btn-outline">Export JSON</button>
-          <input id="file-import-admin" type="file" accept=".json" style="display:none" />
-          <button id="btn-import-admin" class="btn">Import JSON</button>
+          <div id="detailTitle" style="font-weight:900;font-size:18px"></div>
+          <div id="detailSub" class="muted-small"></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button id="closeDetail" class="btn btn-ghost">Close</button>
         </div>
       </div>
-      <div id="admin-list" class="list" style="margin-top:12px"></div>
-    </section>
-  </main>
 
-  <script>
-  // inline admin.js — admin logic (requires ADMIN_PASS)
-  const ADMIN_API = { load:'/api/load', save:'/api/save' };
-  let DB = null, adminPass = null;
-  const uid = (p='u') => p + '-' + Math.random().toString(36).slice(2,9);
-  const byId = id => document.getElementById(id);
+      <div id="detailBody" class="detail-panel">
+        <!-- fields inserted dynamically -->
+      </div>
 
-  async function loadData(pass){
-    adminPass = pass;
-    const res = await fetch(ADMIN_API.load);
-    if (!res.ok) throw new Error('Load failed');
-    DB = await res.json();
-    renderAll();
-  }
-  async function saveData(newDb){
-    if (!adminPass) return alert('Not logged in');
-    const res = await fetch(ADMIN_API.save, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','x-admin-pass': adminPass},
-      body: JSON.stringify({ content: newDb })
-    });
-    if (!res.ok) {
-      const t = await res.text();
-      throw new Error(t || 'Save failed');
-    }
-    DB = await res.json();
-    renderAll();
-  }
-
-  function renderAll(){ renderList(); }
-  function renderList(){
-    const list = byId('admin-list'); list.innerHTML = '';
-    if (!DB || !DB.applications || DB.applications.length===0) { list.innerHTML = '<div class="muted">No applications</div>'; return; }
-    DB.applications.slice().reverse().forEach(app => {
-      const d = document.createElement('div'); d.className='app-card';
-      const statusCls = app.status === 'approved' ? 'status-approved' : app.status === 'rejected' ? 'status-rejected' : app.status === 'hold' ? 'status-hold' : 'status-pending';
-      d.innerHTML = `
-        <div style="display:flex;justify-content:space-between">
-          <div><strong>$${app.requested} — ${app.purpose||''}</strong><div class="muted">by ${app.userName||'unknown'}</div></div>
-          <div><span class="status-badge ${statusCls}">${app.status}</span></div>
+      <div style="margin-top:12px;display:flex;gap:8px;align-items:flex-start">
+        <select id="adminAction" class="search" style="width:160px">
+          <option value="approved">Approve</option>
+          <option value="rejected">Reject</option>
+          <option value="hold">Hold</option>
+        </select>
+        <textarea id="adminComment" placeholder="Add admin comment (optional)" class="comment-box"></textarea>
+        <div style="display:flex;gap:8px">
+          <button id="applyAction" class="btn btn-primary">Apply</button>
         </div>
-        <div class="muted" style="margin-top:8px">Created: ${app.createdAt ? new Date(app.createdAt).toLocaleString() : '-'}</div>
-        <div class="muted" style="margin-top:8px">Admin comment: ${app.adminComment||'—'}</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(async function(){
+  const loadUrl = '/api/load';
+  const adminUrl = '/api/admin';
+  let DB = null;
+  let apps = [];
+  let selectedApp = null;
+
+  const $ = id => document.getElementById(id);
+  const show = el => el && el.classList.remove('hidden');
+  const hide = el => el && el.classList.add('hidden');
+
+  function toast(msg){
+    alert(msg);
+  }
+
+  async function loadData(){
+    try {
+      const r = await fetch(loadUrl, {cache:'no-store'});
+      if (!r.ok) throw new Error('load failed');
+      DB = await r.json();
+      apps = (DB.applications || []).slice();
+      renderList();
+    } catch (err) {
+      console.error(err);
+      toast('Could not load data.json — check server logs.');
+    }
+  }
+
+  function formatDate(iso){
+    try { return new Date(iso).toLocaleString(); } catch { return iso; }
+  }
+
+  function renderList(){
+    const tbody = $('appsTbody');
+    tbody.innerHTML = '';
+    const filter = $('filterStatus').value;
+    const q = ($('searchQ').value || '').trim().toLowerCase();
+
+    const list = apps.filter(a => {
+      if (filter && a.status !== filter) return false;
+      if (!q) return true;
+      return (a.userName && a.userName.toLowerCase().includes(q)) ||
+             (a.userEmail && a.userEmail.toLowerCase().includes(q)) ||
+             (a.id && a.id.toLowerCase().includes(q));
+    });
+
+    if (!list.length) {
+      $('empty').textContent = 'No applications found for the selected filter.';
+    } else {
+      $('empty').textContent = '';
+    }
+
+    list.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt)).forEach(a => {
+      const tr = document.createElement('tr');
+
+      const statusClass = a.status === 'approved' ? 'status-approved' : a.status === 'rejected' ? 'status-rejected' : a.status === 'hold' ? 'status-hold' : 'status-pending';
+
+      tr.innerHTML = `
+        <td>
+          <div style="font-weight:800">${escapeHtml(a.userName||'—')}</div>
+          <div class="muted-small">${escapeHtml(a.userEmail||'—')}</div>
+          <div class="muted-small">${escapeHtml(a.id)}</div>
+        </td>
+        <td>$${Number(a.requested||0).toLocaleString()}</td>
+        <td>${a.term || '-' } months</td>
+        <td class="muted-small">${formatDate(a.createdAt)}</td>
+        <td><div class="status-pill ${statusClass}">${escapeHtml(a.status)}</div></td>
+        <td>
+          <div class="actions">
+            <button class="btn btn-outline btn-sm" data-id="${a.id}" data-action="view">View</button>
+            <button class="btn btn-ghost btn-sm" data-id="${a.id}" data-action="download">JSON</button>
+          </div>
+        </td>
       `;
-      const ctrl = document.createElement('div'); ctrl.className='row';
-      ['approve','hold','reject'].forEach(action => {
-        const b = document.createElement('button'); b.className='btn'; b.innerText = action[0].toUpperCase()+action.slice(1);
-        b.onclick = async () => {
-          const comment = prompt('Add a comment for ' + action + ' (required)');
-          if (comment === null) return;
-          if (comment.trim()==='') { alert('Comment required'); return; }
-          app.status = action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'hold';
-          app.adminComment = comment.trim();
-          app.adminAt = new Date().toISOString();
-          try { await saveData(DB); } catch (err) { alert('Save failed: ' + (err.message || err)); }
-        };
-        ctrl.appendChild(b);
+      tbody.appendChild(tr);
+    });
+
+    // attach click handlers
+    tbody.querySelectorAll('button[data-action]').forEach(b => {
+      b.addEventListener('click', (e) => {
+        const id = b.getAttribute('data-id');
+        const action = b.getAttribute('data-action');
+        const app = apps.find(x => x.id === id);
+        if (!app) return;
+        if (action === 'view') openDetail(app);
+        if (action === 'download') downloadJson(app);
       });
-      if (app.withdrawalRequested && !app.withdrawalCompleted) {
-        const comp = document.createElement('button'); comp.className='btn'; comp.innerText='Mark Withdrawal Completed';
-        comp.onclick = async () => {
-          const ok = confirm(`Mark withdrawal for $${app.requested} as completed?`);
-          if (!ok) return;
-          app.withdrawalCompleted = true;
-          app.withdrawalCompletedAt = new Date().toISOString();
-          try { await saveData(DB); } catch (err) { alert('Save failed: ' + (err.message || err)); }
-        };
-        ctrl.appendChild(comp);
-      }
-      d.appendChild(ctrl);
-      list.appendChild(d);
     });
   }
 
-  // export/import
-  function setupImportExport() {
-    byId('btn-export-admin').onclick = () => {
-      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(DB, null,2)], {type:'application/json'}));
-      a.download = 'loanclub-data.json'; a.click();
-    };
-    byId('btn-import-admin').onclick = () => byId('file-import-admin').click();
-    byId('file-import-admin').onchange = async e => {
-      const f = e.target.files[0]; if (!f) return;
-      const txt = await f.text();
-      try {
-        const parsed = JSON.parse(txt);
-        if (!confirm('Overwrite repo data.json with uploaded file?')) return;
-        await saveData(parsed);
-        alert('Imported and saved.');
-      } catch (err) { alert('Invalid JSON'); }
-    };
+  function downloadJson(app){
+    const data = JSON.stringify(app, null, 2);
+    const blob = new Blob([data], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `application-${app.id}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 
-  // wire login / refresh
-  byId('btn-admin-login').onclick = async () => {
-    const pass = byId('admin-pass').value.trim();
-    if (!pass) return alert('Enter admin password');
+  function escapeHtml(str){
+    if (!str && str !== 0) return '';
+    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+
+  function openDetail(app){
+    selectedApp = app;
+    $('detailTitle').textContent = `${app.userName || app.userEmail} — $${(app.requested||0).toLocaleString()}`;
+    $('detailSub').textContent = `${formatDate(app.createdAt)} • ${app.id}`;
+    const body = $('detailBody');
+    body.innerHTML = '';
+
+    // full details layout
+    const rows = [];
+    rows.push({k:'Full name', v:app.userName});
+    rows.push({k:'Email', v:app.userEmail});
+    rows.push({k:'Phone', v:app.phone || '—'});
+    rows.push({k:'Address', v:app.address || '—'});
+    rows.push({k:'Zip', v:app.zip || '—'});
+    rows.push({k:'Requested', v:`$${(app.requested||0).toLocaleString()}`});
+    rows.push({k:'Term (months)', v: app.term || '-'});
+    rows.push({k:'Purpose', v: app.purpose || '—'});
+    rows.push({k:'Bank name', v: app.bank?.bankName || '—'});
+    rows.push({k:'Account #', v: app.bank?.accountNumber ? '••••' + String(app.bank.accountNumber).slice(-4) : '—'});
+    rows.push({k:'Routing #', v: app.bank?.routingNumber || '—'});
+    rows.push({k:'Account type', v: app.bank?.accountType || '—'});
+    rows.push({k:'References', v: app.references || '—'});
+    rows.push({k:'Status', v: app.status || 'pending'});
+    rows.push({k:'Admin comment', v: app.adminComment || '—'});
+    rows.push({k:'Application ID', v: app.id});
+    rows.push({k:'Submitted at', v: formatDate(app.createdAt)});
+    // append rows
+    rows.forEach(r => {
+      const el = document.createElement('div');
+      el.className = 'field-row';
+      el.innerHTML = `<div class="field" style="font-weight:700">${escapeHtml(r.k)}</div><div class="field muted-small">${escapeHtml(r.v)}</div>`;
+      body.appendChild(el);
+    });
+
+    // prefill admin controls
+    $('adminComment').value = app.adminComment || '';
+    $('adminAction').value = app.status === 'approved' ? 'approved' : app.status === 'rejected' ? 'rejected' : app.status === 'hold' ? 'hold' : 'approved';
+
+    show($('detailModal'));
+  }
+
+  function closeDetail(){
+    selectedApp = null;
+    hide($('detailModal'));
+  }
+
+  async function applyAdminAction(){
+    if (!selectedApp) return;
+    const newStatus = $('adminAction').value;
+    const comment = $('adminComment').value.trim();
+    // send to server
     try {
-      await loadData(pass);
-      document.getElementById('admin-panel').classList.remove('hidden');
-      byId('btn-admin-login').disabled = true;
-      byId('admin-pass').value = '';
-      setupImportExport();
+      const res = await fetch(adminUrl, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ action: 'updateStatus', id: selectedApp.id, status: newStatus, adminComment: comment })
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error(t || 'admin update failed');
+      }
+      const json = await res.json();
+      // update local apps and refresh list
+      apps = json.applications || apps;
+      toast('Status updated');
+      closeDetail();
+      renderList();
     } catch (err) {
-      alert('Login failed: ' + (err.message || err));
+      console.error(err);
+      toast('Could not update — check server logs');
     }
-  };
-  byId('btn-refresh').onclick = async () => {
-    if (!adminPass) return alert('Not logged in');
-    try { await loadData(adminPass); } catch (err) { alert('Refresh failed'); }
-  };
-  </script>
+  }
+
+  // wire UI controls
+  $('refreshBtn').addEventListener('click', () => loadData());
+  $('filterStatus').addEventListener('change', () => renderList());
+  $('searchQ').addEventListener('input', () => renderList());
+  $('closeDetail').addEventListener('click', closeDetail);
+  $('applyAction').addEventListener('click', applyAdminAction);
+
+  // initial load
+  await loadData();
+})();
+</script>
 </body>
 </html>
