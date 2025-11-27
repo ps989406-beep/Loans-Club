@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Loan Club — Demo</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="brand">Loan Club</div>
+    <nav>
+      <button id="btn-view-login" class="btn">Login / Signup</button>
+      <button id="btn-view-admin" class="btn">Admin</button>
+      <button id="btn-export" class="btn">Export JSON</button>
+      <input id="file-import" type="file" accept=".json" style="display:none"/>
+    </nav>
+  </header>
+
+  <main id="app" class="container">
+    <section id="hero" class="card">
+      <h1>Welcome to Loan Club</h1>
+      <p>Apply for a loan quickly and safely. This is a demo app — data stored in repo via Vercel serverless functions.</p>
+      <div class="row">
+        <button id="btn-start" class="btn primary">Get Started</button>
+        <button id="btn-demo-import" class="btn">Load Demo Data</button>
+      </div>
+    </section>
+
+    <section id="auth" class="card hidden">
+      <h2 id="auth-title">Login</h2>
+      <form id="auth-form">
+        <input id="name" placeholder="Full name (signup only)" />
+        <input id="email" placeholder="Email" required />
+        <input id="password" type="password" placeholder="Password" required />
+        <div class="row">
+          <button type="submit" class="btn primary" id="auth-submit">Login</button>
+          <button id="auth-switch" type="button" class="btn">Switch to Signup</button>
+        </div>
+      </form>
+      <div id="auth-msg" class="muted"></div>
+    </section>
+
+    <section id="dashboard" class="card hidden">
+      <h2 id="dash-title">Your Applications</h2>
+      <div id="user-info" class="muted"></div>
+      <div id="apply-form" class="card small">
+        <h3>Apply for Loan</h3>
+        <form id="loan-form">
+          <input id="loan-amount" placeholder="Loan amount (USD)" required />
+          <input id="loan-term" placeholder="Term (months)" />
+          <input id="loan-purpose" placeholder="Purpose" />
+          <input id="loan-income" placeholder="Annual income" />
+          <button type="submit" class="btn primary">Submit Application</button>
+        </form>
+      </div>
+
+      <div id="applications-list"></div>
+    </section>
+
+    <section id="admin" class="card hidden">
+      <h2>Admin Dashboard</h2>
+      <div class="row">
+        <button id="btn-refresh" class="btn">Refresh Data</button>
+        <button id="btn-import" class="btn">Import JSON</button>
+      </div>
+      <div id="admin-list"></div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="modal-title"></h3>
+      <div id="modal-body"></div>
+      <div class="row">
+        <button id="modal-cancel" class="btn">Cancel</button>
+        <button id="modal-ok" class="btn primary">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
