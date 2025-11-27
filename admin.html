@@ -29,6 +29,7 @@
     .field{flex:1;min-width:180px}
     .muted-small{color:var(--text-muted);font-size:13px}
     .comment-box{width:100%;height:90px;padding:10px;border-radius:8px;background:#07101b;border:1px solid rgba(255,255,255,0.06);color:var(--text-light)}
+    .small-note{font-size:12px;color:var(--text-muted);margin-top:8px}
   </style>
 </head>
 <body>
@@ -101,6 +102,8 @@
           <button id="applyAction" class="btn btn-primary">Apply</button>
         </div>
       </div>
+
+      <div class="small-note">Showing full applicant details (sensitive). Protect this admin page with authentication in production.</div>
     </div>
   </div>
 
@@ -220,18 +223,19 @@
     const body = $('detailBody');
     body.innerHTML = '';
 
-    // full details layout
+    // full details layout (show full sensitive fields to admin)
     const rows = [];
-    rows.push({k:'Full name', v:app.userName});
-    rows.push({k:'Email', v:app.userEmail});
-    rows.push({k:'Phone', v:app.phone || '—'});
-    rows.push({k:'Address', v:app.address || '—'});
-    rows.push({k:'Zip', v:app.zip || '—'});
+    rows.push({k:'Full name', v:app.userName || '—'});
+    rows.push({k:'Email', v:app.userEmail || '—'});           // full email shown
+    rows.push({k:'Phone', v:app.phone || '—'});               // full phone shown
+    rows.push({k:'Address', v:app.address || '—'});           // full address shown
+    rows.push({k:'Zip', v:app.zip || '—'});                   // full zip shown
     rows.push({k:'Requested', v:`$${(app.requested||0).toLocaleString()}`});
     rows.push({k:'Term (months)', v: app.term || '-'});
     rows.push({k:'Purpose', v: app.purpose || '—'});
+    // Show full bank details (account number NOT masked for admin)
     rows.push({k:'Bank name', v: app.bank?.bankName || '—'});
-    rows.push({k:'Account #', v: app.bank?.accountNumber ? '••••' + String(app.bank.accountNumber).slice(-4) : '—'});
+    rows.push({k:'Account #', v: app.bank?.accountNumber || '—'}); // full account number shown
     rows.push({k:'Routing #', v: app.bank?.routingNumber || '—'});
     rows.push({k:'Account type', v: app.bank?.accountType || '—'});
     rows.push({k:'References', v: app.references || '—'});
