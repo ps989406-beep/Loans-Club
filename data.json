@@ -36,7 +36,9 @@
       },
       "references": "",
       "createdAt": "2025-11-27T08:35:13.405Z",
-      "status": "pending"
+      "status": "approved",
+      "adminComment": "approved",
+      "adminAt": "2025-11-27T08:41:29.492Z"
     }
   ]
 }
