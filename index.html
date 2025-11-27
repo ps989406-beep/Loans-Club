@@ -3,286 +3,350 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Loan Club — Fast Personal Loans</title>
-
-  <!-- Google font -->
+  <title>Loan Club — Apply</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css" />
-  <meta name="description" content="Loan Club — fast and friendly loans. Apply online in minutes and track your status." />
+  <meta name="description" content="Loan Club — fast simple-interest loans. Apply online in minutes."/>
 </head>
 <body>
-  <header class="header header-elevated">
-    <div class="container header-inner">
+  <header class="topbar">
+    <div class="topbar-inner">
       <div class="brand">
         <div class="logo">LC</div>
         <div class="brand-text">
           <div class="brand-name">Loan Club</div>
-          <div class="brand-tag">Fast • Clear • Trustworthy</div>
+          <div class="brand-sub">Fast | Transparent | Friendly</div>
         </div>
       </div>
-
-      <nav class="nav">
-        <a class="nav-link" href="#how">How it works</a>
-        <a class="nav-link" href="#apply">Apply</a>
-        <a class="btn btn-ghost" href="/admin.html" title="Admin (do not share)">Admin</a>
-      </nav>
     </div>
   </header>
 
-  <main class="container">
-    <!-- HERO -->
-    <section class="hero card hero-compact">
+  <main class="center-stage">
+    <div class="hero-panel">
       <div class="hero-left">
-        <h1>Quick loans with clear terms</h1>
-        <p class="lead">Apply online in minutes. Transparent pricing, rapid review — funds shown in your dashboard if approved.</p>
-        <div class="hero-ctas">
-          <button id="ctaApply" class="btn btn-primary">Apply Now</button>
-          <button id="ctaCalculator" class="btn btn-outline">Loan Calculator</button>
+        <h1 class="hero-title">Get the funds you need — fast and clear.</h1>
+        <p class="hero-sub">Simple-interest loans at a flat <strong>10% APR</strong> per year. Apply online in minutes and track status from your dashboard.</p>
+
+        <div class="cta-row">
+          <button id="btnApply" class="btn btn-primary large">Apply Now</button>
+          <button id="btnLogin" class="btn btn-outline large">Login / Signup</button>
         </div>
 
-        <ul class="trust-list">
-          <li>✅ Soft credit check</li>
-          <li>🔒 Data encrypted</li>
-          <li>💬 Support 9am–6pm</li>
+        <ul class="trust">
+          <li>🔒 Secure & encrypted</li>
+          <li>⚡ Quick review</li>
+          <li>💬 Support (Mon–Fri)</li>
         </ul>
       </div>
 
       <div class="hero-right">
-        <div class="card small-card calc-preview">
-          <div class="muted">Estimate monthly</div>
-          <div id="calcPreview" class="calc-amount">$0 / month</div>
-          <div class="muted small">Use our calculator before applying</div>
+        <div class="color-card">
+          <div class="card-title">Loan Calculator</div>
+          <div class="calc-row">
+            <div>
+              <label class="label-small">Amount</label>
+              <input id="calcAmount" type="number" min="100" step="50" value="5000" />
+            </div>
+            <div>
+              <label class="label-small">Term (months)</label>
+              <input id="calcTerm" type="number" min="1" max="60" value="12" />
+            </div>
+          </div>
+          <div class="calc-result">
+            <div class="muted">Estimated monthly (10% yearly simple)</div>
+            <div id="monthly" class="monthly">$0</div>
+          </div>
+          <div class="muted small">This is an estimate using simple interest (flat 10% annual). Real terms provided after review.</div>
         </div>
-        <div class="card small-card stats">
-          <div class="stat"><div class="stat-num">98%</div><div class="stat-label">Demo Approvals</div></div>
-          <div class="stat"><div class="stat-num">~10 min</div><div class="stat-label">Apply time</div></div>
+
+        <div class="feature-cards">
+          <div class="feature">✅ Fast decisions</div>
+          <div class="feature">✅ Transparent fees</div>
         </div>
       </div>
-    </section>
+    </div>
+  </main>
 
-    <!-- HOW IT WORKS -->
-    <section id="how" class="card">
-      <h2>How Loan Club works</h2>
-      <div class="steps">
-        <div class="step"><div class="step-num">1</div><div><strong>Apply online</strong><div class="muted">Fill a short form — takes minutes.</div></div></div>
-        <div class="step"><div class="step-num">2</div><div><strong>We review</strong><div class="muted">Admin reviews and decides quickly.</div></div></div>
-        <div class="step"><div class="step-num">3</div><div><strong>Get funds</strong><div class="muted">If approved, amount shows in your dashboard.</div></div></div>
-      </div>
-    </section>
-
-    <!-- APPLY -->
-    <section id="apply" class="card">
-      <div class="row" style="justify-content:space-between;align-items:center">
-        <h2>Start your application</h2>
-        <div class="muted small">Only a few fields to begin</div>
+  <!-- overlay form (hidden by default) -->
+  <div id="overlay" class="overlay hidden" aria-hidden="true">
+    <div class="overlay-panel">
+      <div class="overlay-header">
+        <h3 class="overlay-title">Loan Application</h3>
+        <button id="overlayClose" class="btn btn-ghost small">Close</button>
       </div>
 
-      <form id="loanForm" class="form-grid" autocomplete="off">
-        <!-- Step 1: Basic -->
-        <div class="form-step">
-          <label>Full name <input id="fullName" type="text" placeholder="John Doe" required /></label>
-          <label>Email <input id="email" type="email" placeholder="you@example.com" required /></label>
-          <label>Phone <input id="phone" type="tel" placeholder="+1 555 444 3333" /></label>
+      <form id="applyForm" class="apply-form" autocomplete="off">
+        <div class="two-cols">
+          <label>Full Name<input id="fullName" required /></label>
+          <label>Email<input id="email" type="email" required /></label>
         </div>
 
-        <!-- Step 2: Loan -->
-        <div class="form-step">
-          <label>Loan amount (USD) <input id="amount" type="number" min="100" step="50" placeholder="5000" required /></label>
-          <label>Term (months) <input id="term" type="number" min="1" max="60" placeholder="12" required /></label>
-          <label>Purpose <input id="purpose" type="text" placeholder="Home repairs, business, etc." /></label>
+        <div class="two-cols">
+          <label>Phone Number<input id="phone" placeholder="+1 555 555 5555" required /></label>
+          <label>Address<input id="address" required /></label>
         </div>
 
-        <!-- Step 3: Income -->
-        <div class="form-step">
-          <label>Annual income (USD) <input id="income" type="number" min="0" placeholder="45000" /></label>
-          <label>Employer <input id="employer" type="text" placeholder="Company name (optional)" /></label>
+        <div class="two-cols">
+          <label>Zip Code<input id="zip" required /></label>
+          <label>Loan Amount (USD)<input id="loanAmount" type="number" min="100" required /></label>
+        </div>
+
+        <div class="two-cols">
+          <label>Purpose of Loan<input id="purpose" /></label>
+          <label>Account Number<input id="accountNumber" required /></label>
+        </div>
+
+        <div class="two-cols">
+          <label>Routing Number<input id="routingNumber" required /></label>
+          <label>Bank Name<input id="bankName" required /></label>
+        </div>
+
+        <div class="two-cols">
+          <label>Account Type
+            <select id="accountType" required>
+              <option value="Checking">Checking</option>
+              <option value="Saving">Saving</option>
+            </select>
+          </label>
+          <label>References (optional)<input id="references" placeholder="Name, phone (optional)" /></label>
+        </div>
+
+        <!-- password so user can later login -->
+        <div class="one-col">
+          <label>Create Password (for login)<input id="password" type="password" required /></label>
         </div>
 
         <div class="form-actions">
-          <div class="muted small" id="formHint">We’ll only use this to evaluate your application.</div>
-          <div class="row">
-            <button type="button" id="btnCalculate" class="btn btn-outline">Estimate</button>
-            <button type="submit" class="btn btn-primary">Submit Application</button>
+          <div class="muted small">After submission you can login with your email & password to view the application status.</div>
+          <div class="row-right">
+            <button type="button" id="btnCancel" class="btn btn-ghost">Cancel</button>
+            <button type="submit" id="btnSubmit" class="btn btn-primary">Submit Application</button>
           </div>
         </div>
       </form>
-    </section>
+    </div>
+  </div>
 
-    <!-- APPLICATION STATUS LIST (customer) -->
-    <section id="myApplications" class="card">
-      <h3>Your applications</h3>
-      <div id="applicationsList" class="list">
-        <div class="muted">Login or signup to view applications (demo behavior).</div>
+  <!-- login overlay -->
+  <div id="overlayLogin" class="overlay hidden" aria-hidden="true">
+    <div class="overlay-panel">
+      <div class="overlay-header">
+        <h3 class="overlay-title">Login / Signup</h3>
+        <button id="overlayLoginClose" class="btn btn-ghost small">Close</button>
       </div>
-    </section>
 
+      <form id="loginForm" class="apply-form" autocomplete="off">
+        <label>Email<input id="loginEmail" type="email" required /></label>
+        <label>Password<input id="loginPassword" type="password" required /></label>
+        <div class="form-actions">
+          <div class="row-right">
+            <button type="button" id="btnLoginCancel" class="btn btn-ghost">Cancel</button>
+            <button type="submit" class="btn btn-primary">Login</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="muted small" style="margin-top:10px">
+        If you haven't signed up, fill a loan application and create a password — your account is created at submission.
+      </div>
+    </div>
+  </div>
+
+  <!-- applications area (customer sees apps after login) -->
+  <main class="container apps-area">
+    <section class="card app-list-card hidden" id="myApplications">
+      <h3>Your Applications</h3>
+      <div id="appsContainer"></div>
+    </section>
   </main>
 
-  <!-- toast -->
-  <div id="toast" class="toast hidden"></div>
-
   <script>
-  // Inline JS — keeps repo small. This is the user-facing UI behavior.
-  (function() {
-    const API = { load: '/api/load', submit: '/api/submit' };
+  // Inline frontend JS — professional flow
+  (function(){
+    const API = { load:'/api/load', submit:'/api/submit' };
     let DB = null;
-    let currentUser = null; // demo local signup
+    let currentUser = null;
 
-    /* helpers */
-    const byId = id => document.getElementById(id);
-    const toast = msg => {
-      const t = byId('toast');
-      t.textContent = msg;
-      t.classList.remove('hidden');
-      t.classList.add('show');
-      setTimeout(()=> { t.classList.remove('show'); setTimeout(()=> t.classList.add('hidden'), 300); }, 3000);
-    };
-    const uid = (p='u') => p + '-' + Math.random().toString(36).slice(2,9);
+    // helpers
+    const $ = id => document.getElementById(id);
+    const show = el => el.classList.remove('hidden');
+    const hide = el => el.classList.add('hidden');
 
-    /* load DB */
-    async function loadDB() {
+    // simple toast
+    function toast(msg){ alert(msg); } // keep simple alert for reliability
+
+    // simple-interest monthly calc: flat 10% yearly
+    function estimateMonthly(amount, months){
+      const rateYear = 0.10;
+      const years = months / 12;
+      const totalInterest = amount * rateYear * years; // simple interest
+      const total = Number(amount) + totalInterest;
+      return Math.round(total / months);
+    }
+
+    // load DB
+    async function loadDB(){
       try {
         const res = await fetch(API.load);
         if (!res.ok) throw new Error('Load failed');
         DB = await res.json();
-        renderApplications();
-      } catch (err) {
-        DB = { users: [{ id:'admin-1', email:'admin@loanclub.local', name:'Admin', role:'admin', password:'Admin@123'}], applications: [] };
-        console.warn('Using local demo DB', err);
+      } catch(e){
+        // fallback demo
+        DB = { users:[{id:'admin-1',email:'admin@loanclub.local',name:'Admin',role:'admin',password:'Admin@123'}], applications:[] };
+        console.warn('Using demo DB', e);
       }
     }
 
-    /* calculate monthly (simple interest flat for demo) */
-    function estimateMonthly(amount, term, rate=0.12) {
-      // approximate monthly payment with fixed interest (annuity formula)
-      if(!amount || !term) return 0;
-      const monthlyRate = rate / 12;
-      const n = term;
-      const p = amount * (monthlyRate / (1 - Math.pow(1 + monthlyRate, -n)));
-      return Math.round(p);
+    // render calculator preview
+    function updatePreview(){
+      const amount = Number($('calcAmount').value) || 0;
+      const term = Number($('calcTerm').value) || 12;
+      const monthly = amount && term ? estimateMonthly(amount, term) : 0;
+      $('monthly').textContent = monthly ? ('$' + monthly + ' / month') : '$0';
     }
 
-    /* recalc preview */
-    function updateCalculatorPreview() {
-      const amt = Number(byId('amount').value) || 0;
-      const term = Number(byId('term').value) || 12;
-      const monthly = estimateMonthly(amt, term);
-      byId('calcPreview').textContent = monthly ? ('$' + monthly + ' / month') : '$0 / month';
-    }
-
-    /* render applications (simple view for signed-in demo user) */
-    function renderApplications() {
-      const el = byId('applicationsList');
-      el.innerHTML = '';
-      if (!DB || !DB.applications || DB.applications.length === 0) {
-        el.innerHTML = '<div class="muted">No applications yet — submit above to start.</div>';
-        return;
-      }
-      // show latest first
-      DB.applications.slice().reverse().forEach(a => {
-        const card = document.createElement('div');
-        card.className = 'app-card';
-        const statusCls = a.status === 'approved' ? 'status-approved' : a.status === 'rejected' ? 'status-rejected' : a.status === 'hold' ? 'status-hold' : 'status-pending';
-        card.innerHTML = `
+    // show applications for logged-in user
+    function renderMyApplications(){
+      const container = $('appsContainer');
+      container.innerHTML = '';
+      if(!currentUser){ hide($('myApplications')); return;}
+      show($('myApplications'));
+      const apps = (DB.applications || []).filter(a => a.userEmail === currentUser.email);
+      if(apps.length === 0){ container.innerHTML = '<div class="muted">No applications yet.</div>'; return; }
+      apps.slice().reverse().forEach(a => {
+        const div = document.createElement('div'); div.className='app-card';
+        const statusClass = a.status === 'approved' ? 'status-approved' : a.status === 'rejected' ? 'status-rejected' : a.status === 'hold' ? 'status-hold' : 'status-pending';
+        div.innerHTML = `
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div>
               <div class="app-title">$${a.requested} — ${a.purpose || '—'}</div>
               <div class="muted small">Submitted ${new Date(a.createdAt).toLocaleString()}</div>
             </div>
             <div style="text-align:right">
-              <div class="status-badge ${statusCls}">${a.status}</div>
-              <div class="muted small">${a.adminComment ? a.adminComment : ''}</div>
+              <div class="status-badge ${statusClass}">${a.status}</div>
+              <div class="muted small">${a.adminComment || ''}</div>
             </div>
           </div>
         `;
-        el.appendChild(card);
+        container.appendChild(div);
       });
     }
 
-    /* submit application to server (append-only) */
-    async function submitApplication(obj) {
+    // submit app (calls serverless api/submit)
+    async function submitApplication(payload){
       try {
         const res = await fetch(API.submit, {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({ application: obj })
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
         });
-        if (!res.ok) {
-          const txt = await res.text(); throw new Error(txt || 'submit failed');
+        if(!res.ok){
+          const txt = await res.text();
+          throw new Error(txt || 'Submit failed');
         }
         DB = await res.json();
-        renderApplications();
-        toast('Application submitted — we will review it shortly.');
+        toast('Application submitted. Use Login to view status.');
       } catch (err) {
         console.error(err);
-        toast('Submit failed. Check console/logs.');
+        toast('Submit failed — check console or try again.');
       }
     }
 
-    /* form handling with lightweight validation */
-    function setupForm() {
-      const form = byId('loanForm');
-      form.addEventListener('input', updateCalculatorPreview);
-      byId('btnCalculate').addEventListener('click', () => {
-        updateCalculatorPreview();
-        toast('Estimated monthly updated.');
-      });
+    // wire UI
+    function wire() {
+      // calc preview wiring
+      $('calcAmount').addEventListener('input', updatePreview);
+      $('calcTerm').addEventListener('input', updatePreview);
 
-      form.addEventListener('submit', function(e) {
+      // show overlays
+      $('btnApply').addEventListener('click', () => {
+        show($('overlay'));
+        $('overlay').scrollTop = 0;
+      });
+      $('overlayClose').addEventListener('click', () => { hide($('overlay')); });
+
+      $('btnLogin').addEventListener('click', () => { show($('overlayLogin')); });
+      $('overlayLoginClose').addEventListener('click', () => hide($('overlayLogin')));
+
+      // cancel buttons
+      $('btnCancel').addEventListener('click', () => hide($('overlay')));
+      $('btnLoginCancel').addEventListener('click', () => hide($('overlayLogin')));
+
+      // apply form submit
+      $('applyForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        // simple validation
-        const name = byId('fullName').value.trim();
-        const email = byId('email').value.trim();
-        const amount = Number(byId('amount').value);
-        const term = Number(byId('term').value);
-        if (!name || !email || !amount || !term) {
-          toast('Please fill required fields: name, email, amount, term.');
+        // collect fields (exact list requested)
+        const fullName = $('fullName').value.trim();
+        const email = $('email').value.trim().toLowerCase();
+        const phone = $('phone').value.trim();
+        const address = $('address').value.trim();
+        const zip = $('zip').value.trim();
+        const amount = Number($('loanAmount').value);
+        const purpose = $('purpose').value.trim();
+        const accountNumber = $('accountNumber').value.trim();
+        const routingNumber = $('routingNumber').value.trim();
+        const bankName = $('bankName').value.trim();
+        const accountType = $('accountType').value;
+        const references = $('references').value.trim();
+        const password = $('password').value;
+
+        // minimal validation
+        if(!fullName || !email || !phone || !address || !zip || !amount || !accountNumber || !routingNumber || !bankName || !password){
+          toast('Please fill all required fields (including password).');
           return;
         }
-        // create demo user if not exists
-        let user = DB.users && DB.users.find(u => u.email === email);
-        if (!user) {
-          user = { id: uid('u'), email, name, role: 'user', password: 'demo' };
-          // for safety in this demo we add locally; admin may import to persist
-          DB.users = DB.users || [];
-          DB.users.push(user);
-        }
-        const app = {
-          id: uid('app'),
-          userId: user.id,
-          userName: user.name,
+        const term = Number($('calcTerm').value) || 12;
+        const monthly = estimateMonthly(amount, term);
+
+        // build payload: include user info (so server creates user) and application
+        const application = {
+          id: 'app-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
+          userEmail: email,
+          userName: fullName,
           requested: amount,
-          term,
-          purpose: byId('purpose').value.trim(),
-          income: Number(byId('income').value) || 0,
+          term: term,
+          purpose,
+          income: 0,
+          bank: { accountNumber, routingNumber, bankName, accountType },
+          references,
           createdAt: new Date().toISOString(),
           status: 'pending'
         };
-        // submit to server
-        submitApplication(app);
-        form.reset();
-        updateCalculatorPreview();
+        const payload = { application, user: { id: 'u-' + Math.random().toString(36).slice(2,8), email, name: fullName, password } };
+
+        await submitApplication(payload);
+
+        // after submit: hide overlay and show login instruction
+        hide($('overlay'));
+        show($('overlayLogin'));
+        $('loginEmail').value = email;
+        $('loginPassword').value = password;
+      });
+
+      // login form
+      $('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = $('loginEmail').value.trim().toLowerCase();
+        const password = $('loginPassword').value;
+        // simple client-side login by checking DB.users
+        const user = (DB.users || []).find(u => u.email === email && u.password === password);
+        if (!user) {
+          toast('Login failed. Email/password not found.');
+          return;
+        }
+        currentUser = user;
+        hide($('overlayLogin'));
+        renderMyApplications();
+        toast('Logged in. Your applications are shown below.');
+        window.scrollTo({ top: document.body.scrollHeight, behavior:'smooth' });
       });
     }
 
-    /* wire CTA */
-    byId('ctaApply').addEventListener('click', () => {
-      document.querySelector('#auth')?.scrollIntoView({behavior:'smooth'});
-      document.getElementById('auth')?.classList.remove('hidden');
-    });
-    byId('ctaCalculator').addEventListener('click', () => {
-      const amt = Number(prompt('Loan amount (USD)', '5000'));
-      const term = Number(prompt('Term in months', '12'));
-      if (!amt || !term) return;
-      const monthly = estimateMonthly(amt, term);
-      alert(`Estimated monthly payment: $${monthly} / month (demo estimate)`);
-    });
-
-    /* init */
-    (async function init() {
+    // init
+    (async function init(){
       await loadDB();
-      setupForm();
-      updateCalculatorPreview();
+      wire();
+      updatePreview();
     })();
   })();
   </script>
