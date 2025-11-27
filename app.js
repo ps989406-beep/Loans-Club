@@ -1,22 +1,50 @@
-// app.js — customer frontend (no admin controls shown)
-const API = {
-  load: '/api/load',
-  submit: '/api/submit', // for customers to submit only
-  export: '/api/load'
-};
-
+// app.js — customer frontend (professional + working modal)
+const API = { load: '/api/load', submit: '/api/submit' };
 let DB = null;
 let currentUser = null;
 
-// fetch DB for reads
+// --- modal utility ---
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modal-title');
+const modalBody = document.getElementById('modal-body');
+const modalOk = document.getElementById('modal-ok');
+const modalCancel = document.getElementById('modal-cancel');
+
+function showModal(title, bodyHTML, onOk, onCancel) {
+  modalTitle.textContent = title || '';
+  modalBody.innerHTML = (typeof bodyHTML === 'string') ? bodyHTML : '';
+  modal.classList.remove('hidden');
+  modalOk.focus();
+
+  const okHandler = () => {
+    hideModal();
+    cleanup();
+    if (typeof onOk === 'function') onOk();
+  };
+  const cancelHandler = () => {
+    hideModal();
+    cleanup();
+    if (typeof onCancel === 'function') onCancel();
+  };
+  function cleanup() {
+    modalOk.removeEventListener('click', okHandler);
+    modalCancel.removeEventListener('click', cancelHandler);
+    document.removeEventListener('keydown', escHandler);
+  }
+  function escHandler(e) { if (e.key === 'Escape') cancelHandler(); }
+  modalOk.addEventListener('click', okHandler);
+  modalCancel.addEventListener('click', cancelHandler);
+  document.addEventListener('keydown', escHandler);
+}
+function hideModal() { modal.classList.add('hidden'); }
+
+// --- data functions ---
 async function loadData() {
   const res = await fetch(API.load);
-  if (!res.ok) throw new Error('Load failed');
+  if (!res.ok) throw new Error('Unable to load data');
   DB = await res.json();
   renderAll();
 }
-
-// submit application (calls server to append)
 async function submitApplication(app) {
   const res = await fetch(API.submit, {
     method: 'POST',
@@ -24,178 +52,137 @@ async function submitApplication(app) {
     body: JSON.stringify({ application: app })
   });
   if (!res.ok) {
-    const t = await res.text();
-    alert('Submit failed: ' + t);
-    throw new Error('Submit failed');
+    const txt = await res.text();
+    throw new Error(txt || 'Submit failed');
   }
-  const newDb = await res.json();
-  DB = newDb;
+  DB = await res.json();
   renderAll();
 }
 
 // helpers
-function uid(prefix='u'){ return prefix + '-' + Math.random().toString(36).slice(2,9) }
+function uid(p='u'){ return p + '-' + Math.random().toString(36).slice(2,9) }
 function byId(id){ return document.getElementById(id) }
 
 // render
-function renderAll(){
-  if(!DB) return;
+function renderAll() {
+  if (!DB) return;
   renderApplications();
 }
-
-function renderApplications(){
+function renderApplications() {
   const list = byId('applications-list');
   list.innerHTML = '';
-  if(!currentUser){
-    list.innerHTML = '<div class="muted">Login to see your applications.</div>';
+  if (!currentUser) {
+    list.innerHTML = '<div class="muted">Please login to view your applications.</div>';
     return;
   }
   const apps = DB.applications.filter(a => a.userId === currentUser.id);
-  if(apps.length===0) list.innerHTML = '<div class="muted">No applications yet.</div>';
+  if (!apps.length) list.innerHTML = '<div class="muted">No applications yet.</div>';
   apps.forEach(a => {
-    const div = document.createElement('div');
-    div.className = 'app-card';
-    const statusCls = {
-      pending:'status-pending',
-      approved:'status-approved',
-      rejected:'status-rejected',
-      hold:'status-hold'
-    }[a.status] || 'status-pending';
-    div.innerHTML = `
+    const d = document.createElement('div');
+    d.className = 'app-card';
+    const statusCls = a.status === 'approved' ? 'status-approved' : a.status === 'rejected' ? 'status-rejected' : a.status === 'hold' ? 'status-hold' : 'status-pending';
+    d.innerHTML = `
       <div style="display:flex;justify-content:space-between">
-        <div><strong>Requested: $${a.requested}</strong><div class="muted">Purpose: ${a.purpose || '—'}</div></div>
-        <div><span class="status-badge ${statusCls}">${a.status || 'pending'}</span></div>
+        <div><strong>Requested: $${a.requested}</strong><div class="muted">Purpose: ${a.purpose||'—'}</div></div>
+        <div><span class="status-badge ${statusCls}">${a.status}</span></div>
       </div>
-      <div class="muted" style="margin-top:8px">Admin comment: ${a.adminComment || '—'}</div>
+      <div class="muted" style="margin-top:8px">Admin comment: ${a.adminComment||'—'}</div>
     `;
-    if(a.status==='approved' && !a.withdrawalRequested){
-      const wbtn = document.createElement('button');
-      wbtn.className='btn';
-      wbtn.innerText='Withdraw to bank (simulate)';
-      wbtn.onclick = async () => {
-        // mark withdrawalRequested locally and send to admin for finalization (admins will complete)
-        a.withdrawalRequested = true;
-        a.withdrawalAt = new Date().toISOString();
-        // we call submit endpoint to append change — but we want admin to be the one to finalize.
-        // For simplicity, call admin save is not allowed here; we call submit to write change (append).
-        // Instead we call a protected admin endpoint - not available for customers.
-        // So we'll call a lightweight update via fetch to /api/submit_update (NOT available).
-        // To keep customer flow working, just show confirmation locally; admin will mark complete later.
-        alert('Withdrawal requested. Admin will process it.');
-        renderAll();
+    if (a.status === 'approved' && !a.withdrawalRequested) {
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.innerText = 'Withdraw (simulate)';
+      btn.onclick = () => {
+        showModal('Withdraw request', `<p>Request withdrawal for <strong>$${a.requested}</strong>?</p>`, async () => {
+          a.withdrawalRequested = true;
+          a.withdrawalAt = new Date().toISOString();
+          // we cannot call admin save here; just notify user & rely on admin to finalize via admin panel
+          alert('Withdrawal requested. Admin will process it from the admin dashboard.');
+          renderAll();
+        });
       };
-      div.appendChild(wbtn);
+      d.appendChild(btn);
     }
-    list.appendChild(div);
+    list.appendChild(d);
   });
 }
 
-// AUTH UI (client-side demo auth, stored in data.json — not secure)
+// auth & forms
 function setupAuth() {
-  byId('btn-start').onclick = () => {
-    byId('hero-card').classList.add('hidden');
-    byId('auth').classList.remove('hidden');
-  };
-  let signup=false;
-  byId('auth-switch').onclick = ()=>{
+  byId('btn-start').onclick = () => { byId('hero').classList?.add?.('hidden'); byId('auth').classList.remove('hidden'); };
+  let signup = false;
+  byId('auth-switch').onclick = () => {
     signup = !signup;
     byId('auth-title').innerText = signup ? 'Signup' : 'Login';
     byId('auth-submit').innerText = signup ? 'Signup' : 'Login';
     byId('name').style.display = signup ? 'block' : 'none';
   };
-  byId('auth-form').onsubmit = async (ev)=>{
-    ev.preventDefault();
+  byId('auth-form').onsubmit = async (e) => {
+    e.preventDefault();
     const email = byId('email').value.trim();
-    const password = byId('password').value.trim();
-    const name = byId('name').value.trim();
-    if(signup){
-      // temporary client-side create — this will push a new user into repo via admin workflow.
-      const exists = DB.users.find(u => u.email === email);
-      if(exists){ byId('auth-msg').innerText = 'Email already exists'; return; }
-      // For simplicity in this demo we create user locally and prompt admin to import.
+    const pass = byId('password').value.trim();
+    const name = byId('name').value.trim() || email;
+    if (signup) {
+      // local signup (demo). Persist by exporting JSON and admin import for real persistence.
+      if (DB.users.find(u => u.email === email)) return byId('auth-msg').innerText = 'Email exists';
       const id = uid('u');
-      const user = {id, email, name: name||email, role:'user', password};
-      // We will append the user by using the submit endpoint as "special" operation is NOT allowed.
-      // Since we cannot safely let customers write users directly, we simulate a local signup then notify admin via export.
-      DB.users.push(user);
-      alert('Signup complete locally. To persist, please export JSON and import via admin panel.');
-      currentUser = user;
+      const u = { id, email, name, role:'user', password: pass };
+      DB.users.push(u);
+      currentUser = u;
+      alert('Signed up locally. Export JSON to persist or ask admin to import.');
       showDashboard();
     } else {
-      const found = DB.users.find(u => u.email===email && u.password===password);
-      if(!found){ byId('auth-msg').innerText='Wrong credentials'; return; }
+      const found = DB.users.find(u => u.email === email && u.password === pass);
+      if (!found) return byId('auth-msg').innerText = 'Wrong credentials';
       currentUser = found;
       showDashboard();
     }
   };
 }
-
-function showDashboard(){
+function showDashboard() {
   byId('auth').classList.add('hidden');
   byId('dashboard').classList.remove('hidden');
-  byId('user-info').innerText = `Signed in as ${currentUser.name} (${currentUser.email})`;
+  byId('user-info').innerText = `${currentUser.name} (${currentUser.email})`;
 }
 
-// Loan form
-function setupLoanForm(){
-  byId('loan-form').onsubmit = async ev => {
-    ev.preventDefault();
-    if(!currentUser){ alert('Login first'); return; }
+function setupLoanForm() {
+  byId('loan-form').onsubmit = async (e) => {
+    e.preventDefault();
+    if (!currentUser) return alert('Please login');
     const requested = byId('loan-amount').value.trim();
     const purpose = byId('loan-purpose').value.trim();
     const term = byId('loan-term').value.trim();
     const income = byId('loan-income').value.trim();
-    const app = {
-      id: uid('app'),
-      userId: currentUser.id,
-      userName: currentUser.name,
-      requested,
-      term, purpose, income,
-      status: 'pending',
-      createdAt: new Date().toISOString()
-    };
-    // call server to append the application
+    const app = { id: uid('app'), userId: currentUser.id, userName: currentUser.name, requested, term, purpose, income, status: 'pending' };
     try {
       await submitApplication(app);
       byId('loan-form').reset();
-      alert('Application submitted successfully.');
-    } catch(e){
-      console.error(e);
+      showModal('Submitted', `<p>Your application for <strong>$${requested}</strong> was submitted.</p>`, () => {});
+    } catch (err) {
+      showModal('Error', `<p>Submit failed: ${err.message}</p>`, () => {});
     }
   };
 }
 
-// Export / import (customer side — export only)
-function setupExportImport(){
+// export
+function setupExport() {
   byId('btn-export').onclick = () => {
     const a = document.createElement('a');
-    const blob = new Blob([JSON.stringify(DB, null, 2)], {type:'application/json'});
-    a.href = URL.createObjectURL(blob);
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(DB, null, 2)], {type:'application/json'}));
     a.download = 'loanclub-data.json';
     a.click();
   };
-  byId('file-import').onchange = async (e)=>{
-    alert('Importing JSON is reserved for admin. Please use admin panel.');
-  };
 }
 
-// modal buttons (example usage)
-function setupModal() {
-  const modal = byId('modal');
-  byId('modal-cancel').onclick = () => modal.classList.add('hidden');
-  byId('modal-ok').onclick = () => modal.classList.add('hidden');
-}
+// modal wiring done already on top
 
-(async function(){
+// init
+(async function init(){
   setupAuth();
   setupLoanForm();
-  setupExportImport();
-  setupModal();
-  byId('btn-view-login').onclick = ()=> { document.getElementById('auth').classList.toggle('hidden'); }
-  try {
-    await loadData();
-  } catch(e){
-    DB = {meta:{brand:'Loan Club'}, users:[], applications:[]};
-    renderAll();
-  }
+  setupExport();
+  document.getElementById('btn-view-login').onclick = () => document.getElementById('auth').classList.toggle('hidden');
+  // safe load
+  try { await loadData(); }
+  catch(e) { DB = {meta:{brand:'Loan Club'}, users:[], applications:[]}; renderAll(); }
 })();
