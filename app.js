@@ -1,26 +1,33 @@
-// app.js — minimal logic for demo
+// app.js — minimal logic for demo (frontend)
 const API = {
   load: '/api/load',
-  save: '/api/save' // will POST full JSON
+  save: '/api/save' // POST full JSON, requires x-admin-pass header
 };
 
 let DB = null;
-let currentUser = null; // {id,email,name,role}
+let currentUser = null;
 
 async function loadData() {
   const res = await fetch(API.load);
+  if (!res.ok) throw new Error('Load failed');
   DB = await res.json();
   renderAll();
 }
 
 async function saveData(newDb) {
-  // Save by sending full JSON to server
+  // Ask admin pass each save to protect repo writes
+  const adminPass = prompt('Enter admin password to save (required for write)');
+  if (!adminPass) { alert('Save cancelled (no admin password)'); return; }
   const res = await fetch(API.save, {
     method: 'POST',
-    headers: {'Content-Type':'application/json'},
+    headers: {'Content-Type': 'application/json', 'x-admin-pass': adminPass},
     body: JSON.stringify({content: newDb})
   });
-  if (!res.ok) throw new Error('Save failed');
+  if (!res.ok) {
+    const txt = await res.text();
+    alert('Save failed: ' + txt);
+    throw new Error('Save failed');
+  }
   DB = await res.json();
   renderAll();
 }
@@ -29,10 +36,9 @@ async function saveData(newDb) {
 function uid(prefix='u'){ return prefix + '-' + Math.random().toString(36).slice(2,9) }
 function byId(id){ return document.getElementById(id) }
 
-// Render UI
+// Render
 function renderAll(){
   if(!DB) return;
-  byId('brand')?.remove();
   byId('dash-title').innerText = 'Your Applications';
   renderApplications();
   renderAdminList();
@@ -87,7 +93,7 @@ function renderAdminList(){
     div.className = 'app-card';
     div.innerHTML = `
       <div style="display:flex;justify-content:space-between">
-        <div><strong>${a.requested}$ — ${a.purpose || ''}</strong>
+        <div><strong>$${a.requested} — ${a.purpose || ''}</strong>
           <div class="muted">by ${a.userName || 'unknown'}</div></div>
         <div><span class="status-badge ${a.status==='approved'?'status-approved':a.status==='rejected'?'status-rejected':a.status==='hold'?'status-hold':'status-pending'}">${a.status}</span></div>
       </div>
@@ -109,6 +115,18 @@ function renderAdminList(){
       };
       btns.appendChild(b);
     });
+    // Withdrawal control for admin
+    if(a.withdrawalRequested && a.withdrawalCompleted !== true){
+      const comp = document.createElement('button');
+      comp.className='btn';
+      comp.innerText='Mark Withdrawal Completed';
+      comp.onclick = async ()=>{
+        a.withdrawalCompleted = true;
+        a.withdrawalCompletedAt = new Date().toISOString();
+        await saveData(DB);
+      };
+      btns.appendChild(comp);
+    }
     div.appendChild(btns);
     list.appendChild(div);
   });
@@ -217,17 +235,17 @@ function setupExportImport(){
     document.getElementById('auth').classList.toggle('hidden');
   };
   byId('btn-demo-import').onclick = async ()=> {
-    // local demo seed if no remote
     if(!DB || !DB.users) {
       DB = {meta:{brand:'Loan Club'}, users:[], applications:[]};
       DB.users.push({id:'admin-1', email:'admin@loanclub.local', name:'Admin', role:'admin', password:'Admin@123'});
-      await saveData(DB);
-      alert('Demo data created and saved (if server writing allowed).');
+      try { await saveData(DB); alert('Demo data created and saved.'); } catch(e){ alert('Demo created locally but save failed (check admin pass)'); }
     }
   };
-  await loadData().catch(()=> {
-    // network fail fallback to minimal local DB
+  try {
+    await loadData();
+  } catch(e){
+    // fallback to local demo DB when load fails
     DB = {meta:{brand:'Loan Club'}, users:[{id:'admin-1',email:'admin@loanclub.local',name:'Admin',role:'admin',password:'Admin@123'}], applications:[]};
     renderAll();
-  });
+  }
 })();
