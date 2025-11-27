@@ -3,58 +3,67 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Loan Club — Apply (Persistent Login)</title>
+  <title>Loan Club — Fast, transparent loans</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css" />
-  <meta name="description" content="Loan Club — wizard application with persistent login"/>
+  <meta name="description" content="Loan Club — fast simple-interest loans. Apply in a few steps and track status." />
 </head>
 <body>
-  <!-- Top bar -->
+  <!-- TOPBAR -->
   <header class="topbar">
     <div class="topbar-inner">
-      <div class="brand" style="display:flex;align-items:center;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px">
         <div class="logo">LC</div>
         <div style="line-height:1">
-          <div class="brand-name">Loan Club</div>
+          <div class="brand-name" style="font-weight:900;color:var(--text-light)">Loan Club</div>
           <div class="brand-sub" style="color:var(--text-muted);font-size:12px">Simple • Transparent • Fast</div>
         </div>
       </div>
 
-      <nav class="top-actions" id="topActions">
+      <nav id="topActions" class="top-actions">
         <button id="loginOpen" class="btn btn-ghost">Login / Signup</button>
       </nav>
     </div>
   </header>
 
-  <!-- Full marketing hero (hidden when logged in) -->
+  <!-- MARKETING HERO (hidden when logged in) -->
   <main id="marketing" class="hero-wrap">
     <div class="hero-card">
       <div class="hero-left">
-        <h1 class="hero-title">Get funds fast — clear, simple terms</h1>
-        <p class="hero-lead">Flat <strong>10% APR</strong> (simple interest). Apply in a few quick steps and track your application.</p>
-        <div class="hero-ctas">
+        <h1 class="hero-title">Get funds when it matters — clear terms, fast decisions</h1>
+        <p class="hero-lead">Flat <strong>10% APR</strong> per year (simple interest). Apply in a few quick steps — funds appear in your dashboard if approved.</p>
+
+        <div class="hero-ctas" style="margin-top:18px">
           <button id="applyOpen" class="btn btn-primary btn-xl">Apply Now</button>
           <button id="calcOpen" class="btn btn-outline">Loan Calculator</button>
         </div>
-        <ul class="badges">
+
+        <ul class="badges" style="margin-top:18px">
           <li>🔒 Secure & encrypted</li>
-          <li>⚡ Quick review</li>
-          <li>🤝 Transparent fees</li>
+          <li>⚡ Fast review (demo)</li>
+          <li>📝 Transparent pricing</li>
         </ul>
 
-        <div class="feature-grid">
+        <div class="feature-grid" style="margin-top:22px">
           <div class="feature">
-            <div class="feature-title">Fast decision</div>
-            <div class="feature-desc muted">Quick demo review.</div>
+            <div class="feature-title">Fast decisions</div>
+            <div class="feature-desc muted">Short application steps with clear checks.</div>
           </div>
           <div class="feature">
-            <div class="feature-title">Clear pricing</div>
-            <div class="feature-desc muted">Flat 10% yearly simple interest.</div>
+            <div class="feature-title">Transparent fees</div>
+            <div class="feature-desc muted">Flat 10% yearly simple interest — no surprises.</div>
           </div>
           <div class="feature">
-            <div class="feature-title">Secure payouts</div>
-            <div class="feature-desc muted">Bank transfers.</div>
+            <div class="feature-title">Bank payouts</div>
+            <div class="feature-desc muted">Direct transfer to your account on approval.</div>
           </div>
+        </div>
+
+        <!-- TRUST LOGOS -->
+        <div style="display:flex;gap:14px;margin-top:20px;align-items:center">
+          <div style="background:rgba(255,255,255,0.02);padding:8px 12px;border-radius:8px">SSL</div>
+          <div style="background:rgba(255,255,255,0.02);padding:8px 12px;border-radius:8px">Fully encrypted</div>
+          <div style="background:rgba(255,255,255,0.02);padding:8px 12px;border-radius:8px">Demo support</div>
         </div>
       </div>
 
@@ -65,44 +74,82 @@
             <label>Amount<input id="calcAmt" type="number" min="100" step="50" value="5000"></label>
             <label>Term (months)<input id="calcTerm" type="number" min="1" max="60" value="12"></label>
           </div>
-          <div class="calc-output">
+          <div class="calc-output" style="margin-top:10px">
             <div class="muted">Est. monthly (simple interest)</div>
             <div id="calcMonthly" class="calc-monthly">$0 / month</div>
-            <div class="muted small">Flat 10% yearly. Estimate only.</div>
+            <div class="muted small" style="margin-top:8px">Flat 10% yearly. This is an estimate — final terms are provided after review.</div>
           </div>
         </div>
 
         <div class="trust-card">
           <div class="trust-title">Trusted by customers</div>
           <div class="trust-stars">★★★★★</div>
-          <div class="muted small">Demo testimonials and secure experience.</div>
+          <div class="muted small">Highly-rated demo experience</div>
         </div>
       </aside>
     </div>
 
-    <section class="testimonials card">
-      <div class="test-col">
-        <div class="quote">"Loan Club made it simple — demo approval was fast."</div>
-        <div class="who">— Jane D.</div>
+    <!-- TESTIMONIALS & REVIEWS (expanded) -->
+    <section style="margin-top:28px">
+      <h3 style="margin:0 0 12px 0">What borrowers say</h3>
+      <div class="testimonials">
+        <div class="test-col">
+          <div class="quote">"Loan Club turned a stressful time into a quick, painless experience — approval came fast."</div>
+          <div class="who">— Jane D., Chicago</div>
+          <div class="muted small" style="margin-top:8px">Great UX • Transparent • Helpful support</div>
+        </div>
+
+        <div class="test-col">
+          <div class="quote">"Clear pricing and fast communication. I loved how the app guided me step-by-step."</div>
+          <div class="who">— Mark T., Austin</div>
+          <div class="muted small" style="margin-top:8px">Easy bank deposits • Clear terms</div>
+        </div>
+
+        <div class="test-col">
+          <div class="quote">"I applied and tracked everything in my dashboard — no surprises and quick payout."</div>
+          <div class="who">— Alicia R., NYC</div>
+          <div class="muted small" style="margin-top:8px">Reliable • Fast</div>
+        </div>
+
+        <div class="test-col">
+          <div class="quote">"Friendly service and uncomplicated forms. Highly recommend this demo service."</div>
+          <div class="who">— Omar S., Miami</div>
+          <div class="muted small" style="margin-top:8px">Smooth experience</div>
+        </div>
       </div>
-      <div class="test-col">
-        <div class="quote">"Clear terms and easy tracking."</div>
-        <div class="who">— Mark T.</div>
-      </div>
-      <div class="test-col">
-        <div class="quote">"Support was helpful (demo)."</div>
-        <div class="who">— Alicia R.</div>
+    </section>
+
+    <!-- FAQ -->
+    <section style="margin-top:26px" class="card">
+      <h3 style="margin-top:0">Frequently asked</h3>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px">
+        <div>
+          <strong>How long until a decision?</strong>
+          <div class="muted small">Demo: usually within a few hours. Admin reviews and updates status.</div>
+        </div>
+        <div>
+          <strong>What interest model do you use?</strong>
+          <div class="muted small">Flat simple interest at 10% yearly; monthly installments shown in calculator.</div>
+        </div>
+        <div>
+          <strong>Where are funds sent?</strong>
+          <div class="muted small">To the bank account details you provide.</div>
+        </div>
+        <div>
+          <strong>Is my data secure?</strong>
+          <div class="muted small">We recommend production services for real deployments. This demo encrypts data in transit.</div>
+        </div>
       </div>
     </section>
   </main>
 
-  <!-- Compact logged-in view: My Applications + New Application (shown when logged in) -->
+  <!-- LOGGED-IN COMPACT VIEW -->
   <main id="loggedInView" class="hero-wrap hidden" style="padding-top:28px;">
     <div style="max-width:1100px;margin:0 auto;padding:0 22px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div>
           <h2 style="margin:0">My Applications</h2>
-          <div class="muted small">View your loan applications and request a new one.</div>
+          <div class="muted small">View your loan applications and apply for a new loan.</div>
         </div>
         <div style="display:flex;gap:10px;align-items:center">
           <button id="newAppBtn" class="btn btn-primary">New Application</button>
@@ -116,7 +163,7 @@
     </div>
   </main>
 
-  <!-- Wizard overlay (ONE-BY-ONE steps) -->
+  <!-- WIZARD (ONE-BY-ONE SLIDER) -->
   <div id="wizard" class="wizard hidden" aria-hidden="true">
     <div class="wizard-panel" role="dialog" aria-modal="true" aria-labelledby="wizardTitle">
       <button id="wizardClose" class="wizard-close btn btn-ghost">Close</button>
@@ -124,7 +171,7 @@
       <div class="wizard-header">
         <div>
           <div id="wizardTitle" class="wizard-title">Apply for a loan</div>
-          <div class="wizard-sub muted">Answer one question at a time</div>
+          <div class="wizard-sub muted">One step at a time — quick & simple</div>
         </div>
       </div>
 
@@ -226,12 +273,13 @@
     </div>
   </div>
 
-  <!-- Login overlay (simple) -->
+  <!-- LOGIN OVERLAY -->
   <div id="loginOverlay" class="overlay-small hidden" aria-hidden="true">
     <div class="overlay-small-panel">
       <div class="overlay-head">
         <div class="title">Login to view applications</div>
       </div>
+
       <form id="loginForm" class="small-form" autocomplete="off">
         <label>Email<input id="login_email" type="email" required /></label>
         <label>Password<input id="login_password" type="password" required /></label>
@@ -240,10 +288,12 @@
           <button type="submit" class="btn btn-primary">Login</button>
         </div>
       </form>
+
+      <div class="muted small" style="margin-top:10px">If you don't have an account, submit an application — your account will be created with the password you provided.</div>
     </div>
   </div>
 
-  <!-- Applications area for logged-in user (populated dynamically) -->
+  <!-- TOAST -->
   <div id="toast" class="toast hidden"></div>
 
   <script>
@@ -251,11 +301,11 @@
     const API = { load:'/api/load', submit:'/api/submit' };
     let DB = null;
     let currentUser = null;
+    const LS_KEY = 'loanclub_user_v1';
 
     const $ = id => document.getElementById(id);
-    const show = el => el.classList.remove('hidden');
-    const hide = el => el.classList.add('hidden');
-    const LS_KEY = 'loanclub_user_v1';
+    const show = el => el && el.classList.remove('hidden');
+    const hide = el => el && el.classList.add('hidden');
 
     // toast
     function toast(msg){
@@ -266,7 +316,7 @@
       setTimeout(()=> { t.classList.remove('show'); setTimeout(()=> t.classList.add('hidden'), 300); }, 2600);
     }
 
-    // load DB (fallback if API fails)
+    // load DB (tries API, falls back to demo)
     async function loadDB(){
       try {
         const r = await fetch(API.load);
@@ -278,27 +328,20 @@
       }
     }
 
-    // persist user in localStorage
+    // persist user to localStorage
     function saveUserToLocal(u){
       localStorage.setItem(LS_KEY, JSON.stringify({ id:u.id, email:u.email, name:u.name }));
     }
-    function clearUserLocal(){
-      localStorage.removeItem(LS_KEY);
-    }
+    function clearUserLocal(){ localStorage.removeItem(LS_KEY); }
     function loadUserFromLocal(){
-      try {
-        const s = localStorage.getItem(LS_KEY);
-        if (!s) return null;
-        return JSON.parse(s);
-      } catch { return null; }
+      try { const s = localStorage.getItem(LS_KEY); return s ? JSON.parse(s) : null; } catch { return null; }
     }
 
-    // update top actions (hide login if logged in)
+    // update top actions depending on login state
     function updateTopActions(){
       const top = $('topActions');
       top.innerHTML = '';
       if (currentUser){
-        // show name and logout
         const span = document.createElement('div'); span.style.color = 'var(--text-light)'; span.style.fontWeight='700'; span.style.marginRight='12px';
         span.textContent = currentUser.name || currentUser.email;
         const newApp = document.createElement('button'); newApp.className='btn btn-primary'; newApp.id='newAppTop'; newApp.textContent='New Application';
@@ -313,20 +356,11 @@
       }
     }
 
-    // show logged-in view only (My Applications + New Application button)
-    function showLoggedInView(){
-      hide($('marketing'));
-      show($('loggedInView'));
-      updateTopActions();
-      renderMyApps();
-    }
-    function showMarketingView(){
-      show($('marketing'));
-      hide($('loggedInView'));
-      updateTopActions();
-    }
+    // show marketing or logged-in view
+    function showLoggedInView(){ hide($('marketing')); show($('loggedInView')); updateTopActions(); renderMyApps(); }
+    function showMarketingView(){ show($('marketing')); hide($('loggedInView')); updateTopActions(); }
 
-    // render My Applications for currentUser
+    // render applications for current user
     function renderMyApps(){
       const container = $('myAppsList');
       container.innerHTML = '';
@@ -334,104 +368,46 @@
       const apps = (DB.applications || []).filter(a => a.userEmail && a.userEmail.toLowerCase() === currentUser.email.toLowerCase());
       if (!apps.length) { container.innerHTML = '<div class="muted">No applications yet.</div>'; return; }
       apps.slice().reverse().forEach(a => {
-        const div = document.createElement('div'); div.className='app-card';
+        const d = document.createElement('div'); d.className='app-card';
         const css = a.status === 'approved' ? 'status-approved' : a.status === 'rejected' ? 'status-rejected' : a.status === 'hold' ? 'status-hold' : 'status-pending';
-        div.innerHTML = `
+        d.innerHTML = `
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div><div class="app-title">$${a.requested} — ${a.purpose || '—'}</div><div class="muted small">Submitted ${new Date(a.createdAt).toLocaleString()}</div></div>
             <div style="text-align:right"><div class="status-badge ${css}">${a.status}</div><div class="muted small">${a.adminComment || ''}</div></div>
           </div>
         `;
-        container.appendChild(div);
+        container.appendChild(d);
       });
     }
 
-    // login client (checks DB.users)
+    // login client helper (checks DB.users)
     function loginClient(email, password){
       if (!DB || !DB.users) return null;
-      const user = DB.users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-      return user || null;
+      return DB.users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase() && u.password === password) || null;
     }
 
     // logout
     function doLogout(){
       currentUser = null;
       clearUserLocal();
+      updateTopActions();
       showMarketingView();
       toast('Logged out');
     }
 
-    // open wizard prefilled for new app (if logged in)
+    // open wizard; prefill name/email if logged in
     function openWizardForNewApp(){
-      // reset wizard fields but prefill name/email if logged in
       document.querySelectorAll('#wizard input, #wizard select').forEach(i => { i.value = ''; });
       if (currentUser){
         $('w_fullName').value = currentUser.name || '';
         $('w_email').value = currentUser.email || '';
-        // make password optional if logged in
         $('w_password').value = '';
       }
       show($('wizard'));
       showStep(1);
     }
 
-    // submit wizard (uses currentUser if logged in)
-    async function submitWizard(){
-      const data = getWizardData();
-      // basic required validation
-      const required = ['fullName','email','phone','address','zip','amount','accountNumber','routingNumber','bankName'];
-      for (const k of required){
-        if (!data[k] || (typeof data[k] === 'string' && !data[k].trim())) { toast('Please fill required fields'); return; }
-      }
-      // build payload
-      const application = {
-        id: 'app-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
-        userEmail: data.email,
-        userName: data.fullName,
-        requested: data.amount,
-        term: Number($('calcTerm').value) || 12,
-        purpose: data.purpose,
-        income: 0,
-        bank: { accountNumber: data.accountNumber, routingNumber: data.routingNumber, bankName: data.bankName, accountType: data.accountType },
-        references: data.references,
-        createdAt: new Date().toISOString(),
-        status: 'pending'
-      };
-
-      // user payload: if already logged in do not send password (server will attach by email), otherwise include user info
-      let userPayload = null;
-      if (currentUser) {
-        userPayload = null; // server will find user by email
-      } else {
-        userPayload = { id: 'u-' + Date.now(), email: data.email, name: data.fullName, password: data.password || '' };
-      }
-
-      try {
-        const res = await fetch(API.submit, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ application, user: userPayload }) });
-        if (!res.ok) { const t = await res.text(); throw new Error(t || 'submit failed'); }
-        DB = await res.json();
-        toast('Application submitted. It will appear in your dashboard after login.');
-        hide($('wizard'));
-        // If user was not logged in, auto-log them in if they provided a password
-        if (!currentUser && data.password){
-          const u = (DB.users || []).find(u=>u.email && u.email.toLowerCase() === data.email.toLowerCase());
-          if (u) { currentUser = u; saveUserToLocal(u); updateTopActions(); showLoggedInView(); }
-        } else if (currentUser) {
-          // refresh my apps
-          renderMyApps();
-        } else {
-          // open login overlay for user to login
-          show($('loginOverlay'));
-          $('login_email').value = data.email;
-          $('login_password').value = data.password || '';
-        }
-      } catch (err){
-        console.error(err);
-        toast('Submit failed — try again.');
-      }
-    }
-
-    // gather wizard data
+    // collect wizard data
     function getWizardData(){
       return {
         fullName: $('w_fullName').value.trim(),
@@ -450,7 +426,51 @@
       };
     }
 
-    /* ========== WIZARD SLIDER LOGIC ========== */
+    // submit wizard: sends application and optional user
+    async function submitWizard(){
+      const data = getWizardData();
+      const required = ['fullName','email','phone','address','zip','amount','accountNumber','routingNumber','bankName'];
+      for (const k of required){ if (!data[k] || (typeof data[k] === 'string' && !data[k].trim())) { toast('Please fill required fields'); return; } }
+
+      const application = {
+        id: 'app-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
+        userEmail: data.email,
+        userName: data.fullName,
+        requested: data.amount,
+        term: Number($('calcTerm').value) || 12,
+        purpose: data.purpose,
+        bank: { accountNumber: data.accountNumber, routingNumber: data.routingNumber, bankName: data.bankName, accountType: data.accountType },
+        references: data.references,
+        createdAt: new Date().toISOString(),
+        status: 'pending'
+      };
+
+      // if logged in, do not send password; server will match by email
+      let userPayload = null;
+      if (!currentUser && data.password) userPayload = { id: 'u-' + Date.now(), email: data.email, name: data.fullName, password: data.password };
+
+      try {
+        const res = await fetch(API.submit, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ application, user: userPayload }) });
+        if (!res.ok) { const t = await res.text(); throw new Error(t || 'submit failed'); }
+        DB = await res.json();
+        toast('Application submitted. It will appear in your dashboard shortly.');
+        hide($('wizard'));
+
+        // if user was not logged in but provided a password, try to auto-login
+        if (!currentUser && data.password) {
+          const found = (DB.users || []).find(u => u.email && u.email.toLowerCase() === data.email.toLowerCase());
+          if (found) { currentUser = found; saveUserToLocal(found); updateTopActions(); showLoggedInView(); return; }
+        }
+
+        if (currentUser) renderMyApps();
+        else { show($('loginOverlay')); $('login_email').value = data.email; $('login_password').value = data.password || ''; }
+      } catch (err){
+        console.error(err);
+        toast('Submit failed — try again.');
+      }
+    }
+
+    /* WIZARD SLIDER LOGIC */
     const totalSteps = 13;
     let step = 1;
     function showStep(n){
@@ -462,9 +482,7 @@
       $('progressBar').style.width = pct + '%';
       $('stepHint').textContent = `Step ${step} of ${totalSteps}`;
       $('btnBack').disabled = step === 1;
-      if (step === totalSteps) { $('btnNext').classList.add('hidden'); $('btnSubmitWizard').classList.remove('hidden'); }
-      else { $('btnNext').classList.remove('hidden'); $('btnSubmitWizard').classList.add('hidden'); }
-      // focus first input
+      if (step === totalSteps) { $('btnNext').classList.add('hidden'); $('btnSubmitWizard').classList.remove('hidden'); } else { $('btnNext').classList.remove('hidden'); $('btnSubmitWizard').classList.add('hidden'); }
       const fi = document.querySelector(`#wizard .step[data-step="${step}"] input, #wizard .step[data-step="${step}"] select`);
       if (fi) fi.focus();
     }
@@ -480,70 +498,60 @@
       return true;
     }
 
-    /* ========== UI Wiring ========== */
+    /* UI Wiring — robust login that refreshes DB before checking credentials */
     function wire(){
-      // hero/apply/calc buttons
-      $('applyOpen').addEventListener('click', () => {
-        // if logged in, open compact new application; else open wizard from marketing
-        openWizardForNewApp();
-      });
-      $('calcOpen').addEventListener('click', () => {
-        alert('Calculator uses flat 10% yearly simple interest. Update amount & term to preview.');
-      });
+      // main CTAs
+      $('applyOpen').addEventListener('click', () => openWizardForNewApp());
+      $('calcOpen').addEventListener('click', () => alert('Calculator uses flat 10% yearly simple interest.'));
 
       // wizard controls
       $('wizardClose').addEventListener('click', () => hide($('wizard')));
-      $('btnNext').addEventListener('click', () => {
-        if (!validateStep(step)) { toast('Please complete required field'); return; }
-        showStep(step + 1);
-      });
+      $('btnNext').addEventListener('click', () => { if (!validateStep(step)) { toast('Please complete required field'); return; } showStep(step + 1); });
       $('btnBack').addEventListener('click', () => showStep(step - 1));
-      document.querySelectorAll('#wizard input, #wizard select').forEach(inp => {
-        inp.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            if (!validateStep(step)) { toast('Please complete required field'); return; }
-            if (step === totalSteps) submitWizard(); else showStep(step + 1);
-          }
-        });
-      });
+      document.querySelectorAll('#wizard input, #wizard select').forEach(inp => inp.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); if (!validateStep(step)) { toast('Please complete required field'); return; } if (step === totalSteps) submitWizard(); else showStep(step + 1); }
+      }));
       $('wizardForm').addEventListener('submit', (e) => { e.preventDefault(); submitWizard(); });
 
-      // top actions (login button)
+      // login overlay open/close
       $('loginOpen').addEventListener('click', () => show($('loginOverlay')));
-
-      // login overlay
       $('loginCancel').addEventListener('click', () => hide($('loginOverlay')));
+
+      // login submit (robust: refresh DB first)
       $('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = $('login_email').value.trim().toLowerCase();
         const pwd = $('login_password').value;
-        if (!DB) await loadDB();
+        if (!email || !pwd) { toast('Please enter email and password.'); return; }
+
+        // refresh DB so recent signups are included
+        try { await loadDB(); } catch (err) { console.warn('DB refresh failed before login', err); }
+
         const user = loginClient(email, pwd);
-        if (!user) { toast('Login failed — wrong credentials'); return; }
+        if (!user) {
+          const byEmail = (DB && DB.users) ? (DB.users.find(u => u.email && u.email.toLowerCase() === email)) : null;
+          if (byEmail) toast('Password incorrect for this email.');
+          else toast('Account not found. You can create one by submitting an application.');
+          return;
+        }
         currentUser = user;
         saveUserToLocal(user);
         updateTopActions();
         showLoggedInView();
         hide($('loginOverlay'));
-        toast('Logged in');
+        toast('Logged in — welcome back!');
       });
 
-      // loggedInView buttons
+      // logged-in view buttons (these are present in DOM and wired on init)
       $('newAppBtn').addEventListener('click', () => openWizardForNewApp());
       $('logoutBtn').addEventListener('click', () => doLogout());
 
-      // topActions after dynamic update will attach logout/new app handlers — ensure click outside wizard closes it
-      $('wizard').addEventListener('click', (e) => {
-        if (e.target === $('wizard')) hide($('wizard'));
-      });
+      // close wizard by clicking backdrop
+      $('wizard').addEventListener('click', (e) => { if (e.target === $('wizard')) hide($('wizard')); });
 
-      // keyboard ESC closes wizard/login
+      // ESC closes overlays
       window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          hide($('wizard'));
-          hide($('loginOverlay'));
-        }
+        if (e.key === 'Escape') { hide($('wizard')); hide($('loginOverlay')); }
       });
 
       // calculator wiring
@@ -551,10 +559,10 @@
       $('calcTerm').addEventListener('input', updateCalcPreview);
     }
 
-    // calculator function
+    // calculator
     function calcMonthly(amount, months){
       const rateYear = 0.10;
-      const years = months / 12;
+      const years = months/12;
       const totalInterest = amount * rateYear * years;
       const total = Number(amount) + totalInterest;
       return Math.round(total / months);
@@ -566,25 +574,25 @@
       $('calcMonthly').textContent = monthly ? ('$' + monthly + ' / month') : '$0 / month';
     }
 
-    /* ========== Init on page load ========== */
+    // INIT
     (async function init(){
       await loadDB();
-      // restore user from localStorage (if exists)
-      const u = loadUserFromLocal();
-      if (u) {
-        // try to find full user in DB (to get name & id)
-        const found = (DB.users || []).find(x => x.email && x.email.toLowerCase() === u.email.toLowerCase());
-        if (found) currentUser = found;
-        else currentUser = u; // best-effort fallback
+
+      // restore user from localStorage
+      const stored = loadUserFromLocal();
+      if (stored) {
+        const full = (DB.users || []).find(u => u.email && u.email.toLowerCase() === stored.email.toLowerCase());
+        currentUser = full || stored;
       }
+
       updateTopActions();
       if (currentUser) showLoggedInView(); else showMarketingView();
 
       wire();
       updateCalcPreview();
-      // initial wizard state
       showStep(1);
     })();
+
   })();
   </script>
 </body>
