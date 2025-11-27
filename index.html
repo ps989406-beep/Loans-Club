@@ -518,61 +518,22 @@
       $('loginCancel').addEventListener('click', () => hide($('loginOverlay')));
 
       // login submit (robust: refresh DB first)
-      // Robust login handler — REPLACE your current loginForm submit listener with this block
-// FINAL LOGIN HANDLER — REPLACE OLD ONE WITH THIS
-$('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = $('login_email').value.trim().toLowerCase();
-  const pwd = $('login_password').value;
+      $('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = $('login_email').value.trim().toLowerCase();
+        const pwd = $('login_password').value;
 
-  if (!email || !pwd) {
-    toast('Please enter both email and password.');
-    return;
-  }
-
-  // 1) Force refresh DB (very important)
-  try {
-    const r = await fetch('/api/load', { cache: 'no-store' });
-    if (r.ok) DB = await r.json();
-  } catch (err) {
-    console.error('Could not load DB before login:', err);
-  }
-
-  console.log("Debug: Users in DB =>", DB?.users);
-
-  // 2) Find user by email
-  const users = DB?.users || [];
-  const found = users.find(u => u.email && u.email.toLowerCase() === email);
-
-  if (!found) {
-    toast('Account not found. Submit an application to create your account.');
-    return;
-  }
-
-  // 3) Check password
-  if (found.password !== pwd) {
-    toast('Incorrect password.');
-    return;
-  }
-
-  // 4) Login success
-  currentUser = found;
-  saveUserToLocal(found);
-  updateTopActions();
-  showLoggedInView();
-  hide($('loginOverlay'));
-  toast('Logged in — welcome back!');
-});
-
-
-  // 6) Extra debug info
-  console.log('Login success, currentUser:', currentUser);
-});
-
+        if (!email || !pwd) { toast('Please enter both email and password.'); return; }
 
         // refresh DB so recent signups are included
-        try { await loadDB(); } catch (err) { console.warn('DB refresh failed before login', err); }
+        try {
+          const r = await fetch(API.load, { cache: 'no-store' });
+          if (r.ok) DB = await r.json();
+        } catch (err) {
+          console.warn('DB refresh failed before login', err);
+        }
 
+        // find user and validate password
         const user = loginClient(email, pwd);
         if (!user) {
           const byEmail = (DB && DB.users) ? (DB.users.find(u => u.email && u.email.toLowerCase() === email)) : null;
@@ -580,6 +541,7 @@ $('loginForm').addEventListener('submit', async (e) => {
           else toast('Account not found. You can create one by submitting an application.');
           return;
         }
+
         currentUser = user;
         saveUserToLocal(user);
         updateTopActions();
@@ -588,9 +550,9 @@ $('loginForm').addEventListener('submit', async (e) => {
         toast('Logged in — welcome back!');
       });
 
-      // logged-in view buttons (these are present in DOM and wired on init)
-      $('newAppBtn').addEventListener('click', () => openWizardForNewApp());
-      $('logoutBtn').addEventListener('click', () => doLogout());
+      // logged-in view buttons
+      document.getElementById('newAppBtn').addEventListener('click', () => openWizardForNewApp());
+      document.getElementById('logoutBtn').addEventListener('click', () => doLogout());
 
       // close wizard by clicking backdrop
       $('wizard').addEventListener('click', (e) => { if (e.target === $('wizard')) hide($('wizard')); });
