@@ -9,7 +9,7 @@
       "email": "admin@loanclub.local",
       "name": "Admin",
       "role": "admin",
-      "password": "Admin@123"  // plaintext for demo only — change this after deploy
+      "password": "Admin@123"
     }
   ],
   "applications": []
