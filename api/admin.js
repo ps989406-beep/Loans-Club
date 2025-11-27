@@ -1,58 +1,115 @@
 // api/admin.js
-// Vercel / Netlify-style serverless handler (Node).
-// Writes changes to data.json in repository root.
+// Serverless admin endpoint that updates an application status/comment by
+// reading and writing data.json via the GitHub Contents API.
+//
+// Requires env:
+//   GITHUB_TOKEN - Personal access token with repo/content write permissions
+//
+// Adjust OWNER/REPO/BRANCH/FILE_PATH if your repo differs.
 
-const fs = require('fs');
-const path = require('path');
+const fetch = global.fetch || require('node-fetch');
 
-const DATA_PATH = path.join(__dirname, '..', 'data.json'); // adjust if your data file live elsewhere
+const OWNER = 'ps989406-beep';
+const REPO = 'Loans-Club';
+const FILE_PATH = 'data.json';
+const BRANCH = 'main'; // change if your default branch is different
 
-function sendJson(res, status, obj){
+function jsonResponse(res, status, payload) {
   res.statusCode = status;
-  res.setHeader('Content-Type','application/json');
-  res.end(JSON.stringify(obj));
+  res.setHeader('Content-Type', 'application/json');
+  res.end(JSON.stringify(payload));
 }
 
 module.exports = async (req, res) => {
-  if (req.method !== 'POST') return sendJson(res, 405, { error:'Method not allowed' });
+  if (req.method !== 'POST') return jsonResponse(res, 405, { error: 'Method not allowed' });
+
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) return jsonResponse(res, 500, { error: 'GITHUB_TOKEN not set on server' });
 
   let body = '';
-  req.on('data', chunk => body += chunk);
-  req.on('end', () => {
+  req.on('data', c => body += c);
+  req.on('end', async () => {
     try {
       const payload = body ? JSON.parse(body) : {};
-      if (!payload || payload.action !== 'updateStatus') return sendJson(res, 400, { error:'Invalid action' });
-      const { id, status, adminComment } = payload;
-      if (!id || !status) return sendJson(res, 400, { error:'Missing id or status' });
-
-      // load data.json
-      if (!fs.existsSync(DATA_PATH)) {
-        return sendJson(res, 500, { error:'data.json not found on server' });
+      if (!payload || payload.action !== 'updateStatus') {
+        return jsonResponse(res, 400, { error: 'Invalid action. Use { action: "updateStatus", id, status, adminComment }' });
       }
-      const raw = fs.readFileSync(DATA_PATH, 'utf8');
-      const data = JSON.parse(raw);
+      const { id, status, adminComment } = payload;
+      if (!id || !status) return jsonResponse(res, 400, { error: 'Missing id or status' });
 
-      const apps = data.applications || [];
-      const idx = apps.findIndex(a => a.id === id);
-      if (idx === -1) return sendJson(res, 404, { error:'Application not found' });
+      // 1) Read current data.json from GitHub to get sha and content
+      const fileUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(FILE_PATH)}?ref=${encodeURIComponent(BRANCH)}`;
+      const getResp = await fetch(fileUrl, {
+        headers: { Authorization: `token ${token}`, 'User-Agent': 'LoanClub-Admin' }
+      });
 
-      // update fields
-      apps[idx].status = status;
-      apps[idx].adminComment = adminComment || '';
-      apps[idx].adminUpdatedAt = new Date().toISOString();
+      let data = { users: [], applications: [] };
+      let sha = null;
 
-      // if approved — optionally set disbursed_on or anything else here (demo)
-      if (status === 'approved') apps[idx].approvedAt = new Date().toISOString();
+      if (getResp.status === 200) {
+        const info = await getResp.json();
+        sha = info.sha;
+        const content = Buffer.from(info.content, info.encoding).toString('utf8');
+        try { data = JSON.parse(content); } catch (e) { data = { users: [], applications: [] }; }
+      } else if (getResp.status === 404) {
+        // file doesn't exist
+        return jsonResponse(res, 500, { error: 'data.json not found in repository' });
+      } else {
+        const txt = await getResp.text();
+        return jsonResponse(res, 500, { error: `GitHub read failed: ${getResp.status} ${txt}` });
+      }
 
-      // write back
-      data.applications = apps;
-      fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2), 'utf8');
+      data.applications = data.applications || [];
+      const idx = data.applications.findIndex(a => a.id === id);
+      if (idx === -1) return jsonResponse(res, 404, { error: 'Application not found' });
 
-      // return updated data
-      return sendJson(res, 200, data);
+      // 2) Apply status/comment updates and timestamps
+      data.applications[idx].status = status;
+      data.applications[idx].adminComment = adminComment || '';
+      data.applications[idx].adminUpdatedAt = new Date().toISOString();
+      if (status === 'approved') data.applications[idx].approvedAt = new Date().toISOString();
+      if (status === 'rejected') data.applications[idx].rejectedAt = new Date().toISOString();
+      if (status === 'hold') data.applications[idx].holdAt = new Date().toISOString();
+
+      // optional: maintain audit log array on the application
+      data.applications[idx].adminHistory = data.applications[idx].adminHistory || [];
+      data.applications[idx].adminHistory.push({
+        action: status,
+        comment: adminComment || '',
+        at: new Date().toISOString()
+      });
+
+      // 3) Commit updated data.json back to GitHub
+      const newContentBase64 = Buffer.from(JSON.stringify(data, null, 2)).toString('base64');
+      const commitBody = {
+        message: `Admin: ${status} ${id}`,
+        content: newContentBase64,
+        branch: BRANCH
+      };
+      if (sha) commitBody.sha = sha;
+
+      const putUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(FILE_PATH)}`;
+      const putResp = await fetch(putUrl, {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${token}`,
+          'User-Agent': 'LoanClub-Admin',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(commitBody)
+      });
+
+      if (!putResp.ok) {
+        const txt = await putResp.text();
+        return jsonResponse(res, 500, { error: `GitHub write failed: ${putResp.status} ${txt}` });
+      }
+
+      // 4) return updated data to client
+      return jsonResponse(res, 200, data);
+
     } catch (err) {
-      console.error('admin endpoint error', err);
-      return sendJson(res, 500, { error: String(err) });
+      console.error('api/admin error', err);
+      return jsonResponse(res, 500, { error: String(err) });
     }
   });
 };
