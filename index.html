@@ -427,48 +427,83 @@
     }
 
     // submit wizard: sends application and optional user
-    async function submitWizard(){
-      const data = getWizardData();
-      const required = ['fullName','email','phone','address','zip','amount','accountNumber','routingNumber','bankName'];
-      for (const k of required){ if (!data[k] || (typeof data[k] === 'string' && !data[k].trim())) { toast('Please fill required fields'); return; } }
+    // submit wizard: sends application and optional user
+async function submitWizard(){
+  const data = getWizardData();
 
-      const application = {
-        id: 'app-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
-        userEmail: data.email,
-        userName: data.fullName,
-        requested: data.amount,
-        term: Number($('calcTerm').value) || 12,
-        purpose: data.purpose,
-        bank: { accountNumber: data.accountNumber, routingNumber: data.routingNumber, bankName: data.bankName, accountType: data.accountType },
-        references: data.references,
-        createdAt: new Date().toISOString(),
-        status: 'pending'
-      };
-
-      // if logged in, do not send password; server will match by email
-      let userPayload = null;
-      if (!currentUser && data.password) userPayload = { id: 'u-' + Date.now(), email: data.email, name: data.fullName, password: data.password };
-
-      try {
-        const res = await fetch(API.submit, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ application, user: userPayload }) });
-        if (!res.ok) { const t = await res.text(); throw new Error(t || 'submit failed'); }
-        DB = await res.json();
-        toast('Application submitted. It will appear in your dashboard shortly.');
-        hide($('wizard'));
-
-        // if user was not logged in but provided a password, try to auto-login
-        if (!currentUser && data.password) {
-          const found = (DB.users || []).find(u => u.email && u.email.toLowerCase() === data.email.toLowerCase());
-          if (found) { currentUser = found; saveUserToLocal(found); updateTopActions(); showLoggedInView(); return; }
-        }
-
-        if (currentUser) renderMyApps();
-        else { show($('loginOverlay')); $('login_email').value = data.email; $('login_password').value = data.password || ''; }
-      } catch (err){
-        console.error(err);
-        toast('Submit failed — try again.');
-      }
+  // required fields check
+  const required = ['fullName','email','phone','address','zip','amount','accountNumber','routingNumber','bankName'];
+  for (const k of required){
+    if (!data[k] || (typeof data[k] === 'string' && !data[k].trim())) {
+      toast('Please fill all required fields before submitting.');
+      return;
     }
+  }
+
+  // build application object and include phone/address/zip explicitly
+  const application = {
+    id: 'app-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
+    userEmail: data.email,
+    userName: data.fullName,
+    phone: data.phone,           // <-- ensure phone is saved
+    address: data.address,       // <-- ensure address is saved
+    zip: data.zip,               // <-- ensure zip is saved
+    requested: data.amount,
+    term: Number($('calcTerm').value) || 12,
+    purpose: data.purpose,
+    income: data.income || 0,
+    bank: {
+      accountNumber: data.accountNumber,
+      routingNumber: data.routingNumber,
+      bankName: data.bankName,
+      accountType: data.accountType
+    },
+    references: data.references,
+    createdAt: new Date().toISOString(),
+    status: 'pending'
+  };
+
+  // create user payload only if not logged in
+  let userPayload = null;
+  if (!currentUser && data.password) {
+    userPayload = { id: 'u-' + Date.now(), email: data.email, name: data.fullName, password: data.password };
+  }
+
+  try {
+    const res = await fetch(API.submit, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ application, user: userPayload })
+    });
+
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error(t || 'Submit failed');
+    }
+
+    // update client-side DB with server response
+    DB = await res.json();
+    toast('Application submitted successfully.');
+
+    hide($('wizard'));
+
+    // if not logged in but provided password, try auto-login
+    if (!currentUser && data.password) {
+      const found = (DB.users || []).find(u => u.email && u.email.toLowerCase() === data.email.toLowerCase());
+      if (found) { currentUser = found; saveUserToLocal(found); updateTopActions(); showLoggedInView(); return; }
+    }
+
+    if (currentUser) renderMyApps();
+    else {
+      show($('loginOverlay'));
+      $('login_email').value = data.email;
+      $('login_password').value = data.password || '';
+    }
+  } catch (err) {
+    console.error('submitWizard error', err);
+    toast('Submit failed — check console for details.');
+  }
+}
 
     /* WIZARD SLIDER LOGIC */
     const totalSteps = 13;
