@@ -31,6 +31,13 @@
       "name": "htrgrdf",
       "role": "user",
       "password": "www"
+    },
+    {
+      "id": "u-1764243650047",
+      "email": "ddddd@dddd.ddd",
+      "name": "dddddd",
+      "role": "user",
+      "password": "ddddd@dddd.ddd"
     }
   ],
   "applications": [
@@ -146,6 +153,23 @@
       },
       "references": "dcnc nh j",
       "createdAt": "2025-11-27T11:13:49.540Z",
+      "status": "pending"
+    },
+    {
+      "id": "app-1764243650046-ze85",
+      "userEmail": "ddddd@dddd.ddd",
+      "userName": "dddddd",
+      "requested": 9876,
+      "term": 12,
+      "purpose": "hgfdsxcv",
+      "bank": {
+        "accountNumber": "987654765",
+        "routingNumber": "098769876",
+        "bankName": "uhbnhgv",
+        "accountType": "Checking"
+      },
+      "references": "fghnbv",
+      "createdAt": "2025-11-27T11:40:50.046Z",
       "status": "pending"
     }
   ]
