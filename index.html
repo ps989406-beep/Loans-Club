@@ -23,7 +23,7 @@
     <section class="hero card">
       <div class="hero-left">
         <h1>Loans made simple</h1>
-        <p class="muted">Fast online applications, clear status tracking. Demo for Loan Club.</p>
+        <p class="muted">Fast online applications, clear status tracking.</p>
         <div class="row">
           <button id="btn-start" class="btn btn-primary">Apply Now</button>
           <button id="btn-export" class="btn btn-outline">Export Data</button>
@@ -32,7 +32,7 @@
       <div class="hero-right">
         <div class="kpi">
           <div class="kpi-number">Demo</div>
-          <div class="kpi-label">Prototype</div>
+          <div class="kpi-label">Loan Club</div>
         </div>
       </div>
     </section>
@@ -74,17 +74,155 @@
     </section>
   </main>
 
-  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-panel card">
-      <h3 id="modal-title">Modal</h3>
-      <div id="modal-body" class="modal-body"></div>
-      <div class="row modal-actions">
-        <button id="modal-cancel" class="btn btn-ghost">Cancel</button>
-        <button id="modal-ok" class="btn btn-primary">OK</button>
-      </div>
-    </div>
-  </div>
+  <script>
+  // inline app.js — customer logic (no modals)
+  const API = { load: '/api/load', submit: '/api/submit' };
+  let DB = null;
+  let currentUser = null;
 
-  <script src="/app.js"></script>
+  // helpers
+  const uid = (p='u') => p + '-' + Math.random().toString(36).slice(2,9);
+  const byId = id => document.getElementById(id);
+
+  // load DB
+  async function loadData() {
+    const res = await fetch(API.load);
+    if (!res.ok) throw new Error('Load failed');
+    DB = await res.json();
+    renderAll();
+  }
+
+  // submit application (server appends)
+  async function submitApplication(app) {
+    const res = await fetch(API.submit, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ application: app })
+    });
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error(t || 'Submit failed');
+    }
+    DB = await res.json();
+    renderAll();
+  }
+
+  // render
+  function renderAll() {
+    if (!DB) return;
+    renderApplications();
+  }
+  function renderApplications() {
+    const list = byId('applications-list');
+    list.innerHTML = '';
+    if (!currentUser) {
+      list.innerHTML = '<div class="muted">Please login to view your applications.</div>';
+      return;
+    }
+    const apps = DB.applications.filter(a => a.userId === currentUser.id);
+    if (!apps.length) list.innerHTML = '<div class="muted">No applications yet.</div>';
+    apps.forEach(a => {
+      const d = document.createElement('div');
+      d.className = 'app-card';
+      const statusCls = a.status === 'approved' ? 'status-approved' : a.status === 'rejected' ? 'status-rejected' : a.status === 'hold' ? 'status-hold' : 'status-pending';
+      d.innerHTML = `
+        <div style="display:flex;justify-content:space-between">
+          <div><strong>Requested: $${a.requested}</strong><div class="muted">Purpose: ${a.purpose||'—'}</div></div>
+          <div><span class="status-badge ${statusCls}">${a.status}</span></div>
+        </div>
+        <div class="muted" style="margin-top:8px">Admin comment: ${a.adminComment||'—'}</div>
+      `;
+      if (a.status === 'approved' && !a.withdrawalRequested) {
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.innerText = 'Withdraw (simulate)';
+        btn.onclick = () => {
+          const ok = confirm(`Request withdrawal for $${a.requested}?`);
+          if (!ok) return;
+          a.withdrawalRequested = true;
+          a.withdrawalAt = new Date().toISOString();
+          alert('Withdrawal requested. Admin will process it in the admin dashboard.');
+          renderAll();
+        };
+        d.appendChild(btn);
+      }
+      list.appendChild(d);
+    });
+  }
+
+  // auth & forms
+  function setupAuth(){
+    byId('btn-start').onclick = () => { byId('hero')?.classList?.add?.('hidden'); byId('auth').classList.remove('hidden'); };
+    let signup = false;
+    byId('auth-switch').onclick = () => {
+      signup = !signup;
+      byId('auth-title').innerText = signup ? 'Signup' : 'Login';
+      byId('auth-submit').innerText = signup ? 'Signup' : 'Login';
+      byId('name').style.display = signup ? 'block' : 'none';
+    };
+    byId('auth-form').onsubmit = async e => {
+      e.preventDefault();
+      const email = byId('email').value.trim();
+      const pass = byId('password').value.trim();
+      const name = byId('name').value.trim() || email;
+      if (signup) {
+        if (DB.users.find(u => u.email === email)) { byId('auth-msg').innerText = 'Email exists'; return; }
+        const id = uid('u');
+        const u = { id, email, name, role:'user', password: pass };
+        DB.users.push(u);
+        currentUser = u;
+        alert('Signed up locally. Export data to persist, or ask admin to import.');
+        showDashboard();
+      } else {
+        const found = DB.users.find(u => u.email === email && u.password === pass);
+        if (!found) { byId('auth-msg').innerText = 'Wrong credentials'; return; }
+        currentUser = found;
+        showDashboard();
+      }
+    };
+  }
+  function showDashboard(){
+    byId('auth').classList.add('hidden');
+    byId('dashboard').classList.remove('hidden');
+    byId('user-info').innerText = `${currentUser.name} (${currentUser.email})`;
+  }
+
+  function setupLoanForm(){
+    byId('loan-form').onsubmit = async e => {
+      e.preventDefault();
+      if (!currentUser) return alert('Please login');
+      const requested = byId('loan-amount').value.trim();
+      const purpose = byId('loan-purpose').value.trim();
+      const term = byId('loan-term').value.trim();
+      const income = byId('loan-income').value.trim();
+      const app = { id: uid('app'), userId: currentUser.id, userName: currentUser.name, requested, term, purpose, income, status:'pending' };
+      try {
+        await submitApplication(app);
+        byId('loan-form').reset();
+        alert(`Your application for $${requested} was submitted.`);
+      } catch (err) {
+        alert('Submit failed: ' + (err.message || err));
+      }
+    };
+  }
+
+  function setupExport(){
+    byId('btn-export').onclick = () => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(DB, null, 2)], {type:'application/json'}));
+      a.download = 'loanclub-data.json';
+      a.click();
+    };
+  }
+
+  // wire
+  (async function(){
+    setupAuth();
+    setupLoanForm();
+    setupExport();
+    document.getElementById('btn-view-login').onclick = () => document.getElementById('auth').classList.toggle('hidden');
+    try { await loadData(); } catch(e) { DB = {meta:{brand:'Loan Club'}, users:[{id:'admin-1',email:'admin@loanclub.local',name:'Admin',role:'admin',password:'Admin@123'}], applications:[]}; renderAll(); }
+  })();
+  </script>
 </body>
 </html>
