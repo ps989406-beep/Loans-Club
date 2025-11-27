@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Loan Club — Demo</title>
+  <title>Loan Club</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
@@ -11,7 +11,7 @@
     <div class="brand">Loan Club</div>
     <nav>
       <button id="btn-view-login" class="btn">Login / Signup</button>
-      <button id="btn-view-admin" class="btn">Admin</button>
+      <button id="btn-view-admin" class="btn">Toggle Admin</button>
       <button id="btn-export" class="btn">Export JSON</button>
       <input id="file-import" type="file" accept=".json" style="display:none"/>
     </nav>
@@ -19,8 +19,8 @@
 
   <main id="app" class="container">
     <section id="hero" class="card">
-      <h1>Welcome to Loan Club</h1>
-      <p>Apply for a loan quickly and safely. This is a demo app — data stored in repo via Vercel serverless functions.</p>
+      <h1>Loan Club</h1>
+      <p>Apply quickly — this demo stores data in your GitHub repo via Vercel serverless functions.</p>
       <div class="row">
         <button id="btn-start" class="btn primary">Get Started</button>
         <button id="btn-demo-import" class="btn">Load Demo Data</button>
@@ -44,6 +44,7 @@
     <section id="dashboard" class="card hidden">
       <h2 id="dash-title">Your Applications</h2>
       <div id="user-info" class="muted"></div>
+
       <div id="apply-form" class="card small">
         <h3>Apply for Loan</h3>
         <form id="loan-form">
