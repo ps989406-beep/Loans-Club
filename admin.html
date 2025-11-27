@@ -4,20 +4,24 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Loan Club — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <header class="header">
-    <div class="brand"><div class="logo-circle">LC</div><div class="brand-text">Loan Club — Admin</div></div>
+    <div class="brand">
+      <div class="logo">LC</div>
+      <div class="brand-name">Loan Club — Admin</div>
+    </div>
   </header>
 
   <main class="container">
     <section class="card">
       <h2>Admin Login</h2>
-      <p class="muted">Enter admin password (the one set in Vercel `ADMIN_PASS`).</p>
-      <div class="row">
+      <p class="muted">Enter admin password (set in Vercel `ADMIN_PASS`).</p>
+      <div class="row" style="margin-top:10px">
         <input id="admin-pass" placeholder="Admin password" />
-        <button id="btn-admin-login" class="btn primary">Login</button>
+        <button id="btn-admin-login" class="btn btn-primary">Login</button>
       </div>
     </section>
 
@@ -26,22 +30,22 @@
         <h2>Applications</h2>
         <div>
           <button id="btn-refresh" class="btn">Refresh</button>
-          <button id="btn-export-admin" class="btn">Export JSON</button>
-          <input id="file-import-admin" type="file" accept=".json" style="display:none"/>
+          <button id="btn-export-admin" class="btn btn-outline">Export JSON</button>
+          <input id="file-import-admin" type="file" accept=".json" style="display:none" />
           <button id="btn-import-admin" class="btn">Import JSON</button>
         </div>
       </div>
-      <div id="admin-list" class="list"></div>
+      <div id="admin-list" class="list" style="margin-top:12px"></div>
     </section>
   </main>
 
-  <div id="modal-admin" class="modal hidden">
-    <div class="modal-content">
-      <h3 id="modal-admin-title"></h3>
-      <div id="modal-admin-body"></div>
-      <div class="row" style="justify-content:flex-end;margin-top:12px">
-        <button id="modal-admin-cancel" class="btn ghost">Cancel</button>
-        <button id="modal-admin-ok" class="btn primary">OK</button>
+  <div id="modal-admin" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-panel card">
+      <h3 id="modal-admin-title">Confirm</h3>
+      <div id="modal-admin-body" class="modal-body"></div>
+      <div class="row modal-actions">
+        <button id="modal-admin-cancel" class="btn btn-ghost">Cancel</button>
+        <button id="modal-admin-ok" class="btn btn-primary">OK</button>
       </div>
     </div>
   </div>
