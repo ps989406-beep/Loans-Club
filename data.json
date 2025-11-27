@@ -10,6 +10,32 @@
       "name": "Admin",
       "role": "admin",
       "password": "Admin@123"
+    },
+    {
+      "id": "u-1764244100191",
+      "email": "zexcgvhb@fg.jhg",
+      "name": "rxtcvbj",
+      "role": "user",
+      "password": "sffcvb"
+    }
+  ],
+  "applications": [
+    {
+      "id": "app-1764244100191-wl4a",
+      "userEmail": "zexcgvhb@fg.jhg",
+      "userName": "rxtcvbj",
+      "requested": 4444,
+      "term": 12,
+      "purpose": "dgvdvv",
+      "bank": {
+        "accountNumber": "444444444",
+        "routingNumber": "4444444444444444",
+        "bankName": "4rsf",
+        "accountType": "Checking"
+      },
+      "references": "sf",
+      "createdAt": "2025-11-27T11:48:20.191Z",
+      "status": "pending"
     }
   ]
 }
