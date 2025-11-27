@@ -1,7 +1,42 @@
 {
-  "meta": { "brand": "Loan Club", "created_at": "2025-11-27T00:00:00Z" },
+  "meta": {
+    "brand": "Loan Club",
+    "created_at": "2025-11-27T00:00:00Z"
+  },
   "users": [
-    { "id": "admin-1", "email": "admin@loanclub.local", "name": "Admin", "role": "admin", "password": "Admin@123" }
+    {
+      "id": "admin-1",
+      "email": "admin@loanclub.local",
+      "name": "Admin",
+      "role": "admin",
+      "password": "Admin@123"
+    },
+    {
+      "id": "u-hym2c7",
+      "email": "test@mail.com",
+      "name": "test",
+      "role": "user",
+      "password": "test"
+    }
   ],
-  "applications": []
+  "applications": [
+    {
+      "id": "app-1764232513405-2twr",
+      "userEmail": "test@mail.com",
+      "userName": "test",
+      "requested": 2342,
+      "term": 48,
+      "purpose": "szdxfcghv",
+      "income": 0,
+      "bank": {
+        "accountNumber": "234567654",
+        "routingNumber": "234565432",
+        "bankName": "srdfcgvhgfds",
+        "accountType": "Checking"
+      },
+      "references": "",
+      "createdAt": "2025-11-27T08:35:13.405Z",
+      "status": "pending"
+    }
+  ]
 }
