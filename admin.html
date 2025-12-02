@@ -127,36 +127,76 @@
   }
 
   /* ---------- ADMIN KEY HANDLING ---------- */
-  function ensureAdminKeySync() {
-    // If already present in sessionStorage, nothing to do
-    if (sessionStorage.getItem('adminKey')) return true;
+   /* ---------- ADMIN KEY HANDLING (async verify) ---------- */
 
-    // Prompt user for key (simple, immediate)
-    let key = null;
-    try { key = prompt('Enter Admin Key to access admin panel:'); } catch (e) { key = null; }
+  // Prompt for key and verify with server before allowing access.
+  async function ensureAdminKeyVerified() {
+    // If already present, attempt verification
+    let key = sessionStorage.getItem('adminKey') || null;
 
-    if (!key) {
-      alert('Admin key required to access this page. You will be redirected.');
-      // Optional: redirect to home
-      location.href = '/';
-      return false;
+    // helper to call server verify
+    async function verifyKey(k) {
+      try {
+        const resp = await fetch(adminUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-key': k
+          },
+          body: JSON.stringify({ action: 'verify' }),
+          cache: 'no-store'
+        });
+        return resp.ok;
+      } catch (e) {
+        console.error('verifyKey fetch error', e);
+        return false;
+      }
     }
-    sessionStorage.setItem('adminKey', key);
-    return true;
+
+    if (key) {
+      // try to verify stored key
+      const ok = await verifyKey(key);
+      if (ok) return true;
+      // stored key invalid — clear it and fall through to prompt
+      sessionStorage.removeItem('adminKey');
+      key = null;
+    }
+
+    // Ask up to 3 times for correct key
+    for (let attempt = 0; attempt < 3; attempt++) {
+      let entered = null;
+      try { entered = prompt('Enter Admin Key to access admin panel:'); } catch (e) { entered = null; }
+      if (!entered) break;
+      entered = String(entered).trim();
+      const ok = await verifyKey(entered);
+      if (ok) {
+        sessionStorage.setItem('adminKey', entered);
+        return true;
+      } else {
+        alert('Admin key invalid. Please try again.');
+      }
+    }
+
+    // failed verification
+    alert('Could not verify admin key. You will be redirected to the homepage.');
+    // optional: redirect away
+    location.href = '/';
+    return false;
   }
 
-  // Clear admin key UI control
+  // Wire sign-out button (clears stored key)
   const adminKeyLogoutBtn = document.getElementById('adminKeyLogout');
   if (adminKeyLogoutBtn) {
     adminKeyLogoutBtn.addEventListener('click', () => {
       sessionStorage.removeItem('adminKey');
-      alert('Admin key cleared. You will be redirected to login.');
+      alert('Admin key cleared. Reloading.');
       location.reload();
     });
   }
 
-  // Ensure key before doing anything sensitive
-  if (!ensureAdminKeySync()) return;
+  // Ensure verification BEFORE proceeding to loadData
+  // IMPORTANT: this will be awaited below (see INIT flow)
+
 
   /* ---------- DATA LOADING ---------- */
   async function loadData(){
@@ -329,7 +369,7 @@
         sessionStorage.removeItem('adminKey');
         alert('Invalid admin key (401). Please enter the correct key.');
         // re-run key prompt flow
-        if (!ensureAdminKeySync()) return;
+        if (!await ensureAdminKeyVerified()) return;
         return;
       }
 
