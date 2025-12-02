@@ -848,13 +848,26 @@ function wire(){
   const calcBtn = $('calcOpen');
   if (calcBtn) calcBtn.addEventListener('click', () => alert('Calculator uses flat 10% yearly simple interest.'));
 
-  // GET STARTED CTA → Open Apply Wizard
-document.addEventListener("DOMContentLoaded", () => {
-  const gs = document.getElementById("getStartedCTA");
-  if (gs) gs.addEventListener("click", () => {
-    const applyBtn = document.getElementById("applyOpen");
-    if (applyBtn) applyBtn.click();
-  });
+// GET STARTED CTA — robust handler using event delegation
+// Works even if the CTA is added after script runs (no timing issues).
+document.body.addEventListener('click', (e) => {
+  const gs = e.target.closest && e.target.closest('#getStartedCTA');
+  if (!gs) return;
+
+  // Prefer triggering the existing Apply button (keeps behavior consistent)
+  const applyBtn = $('applyOpen') || document.getElementById('applyOpen');
+  if (applyBtn) {
+    applyBtn.click();
+    return;
+  }
+
+  // Fallback: open the wizard directly
+  try {
+    show($('wizard'));
+    showStep(1);
+  } catch (err) {
+    console.error('Get Started fallback failed', err);
+  }
 });
 
 
