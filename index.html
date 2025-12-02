@@ -373,6 +373,35 @@
   </div>
 </section>
 
+<!-- GET STARTED CTA -->
+<section style="margin-top:26px;text-align:center;">
+  <h3 style="color:white;font-size:20px;margin-bottom:10px;font-weight:900">
+    Ready to Start Your Application?
+  </h3>
+
+  <p class="muted" style="margin-bottom:18px;line-height:1.6">
+    It only takes a few minutes to apply and get your request under review.
+  </p>
+
+  <button 
+    id="getStartedCTA"
+    style="
+      padding:14px 28px;
+      font-size:16px;
+      font-weight:800;
+      border-radius:14px;
+      cursor:pointer;
+      color:white;
+      border:none;
+      background:linear-gradient(90deg,var(--blue-neon),var(--violet-neon));
+      box-shadow:0 14px 40px rgba(0,0,0,0.5);
+      transition:0.25s;
+    "
+  >
+    Get Started
+  </button>
+</section>
+
     
     <!-- FAQ -->
     <section style="margin-top:26px" class="card">
@@ -818,6 +847,16 @@ function wire(){
   if (applyBtn) applyBtn.addEventListener('click', () => openWizardForNewApp());
   const calcBtn = $('calcOpen');
   if (calcBtn) calcBtn.addEventListener('click', () => alert('Calculator uses flat 10% yearly simple interest.'));
+
+  // GET STARTED CTA → Open Apply Wizard
+document.addEventListener("DOMContentLoaded", () => {
+  const gs = document.getElementById("getStartedCTA");
+  if (gs) gs.addEventListener("click", () => {
+    const applyBtn = document.getElementById("applyOpen");
+    if (applyBtn) applyBtn.click();
+  });
+});
+
 
   // wizard controls (safe)
   const wizardClose = $('wizardClose');
