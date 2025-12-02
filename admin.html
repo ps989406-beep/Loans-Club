@@ -223,6 +223,30 @@
     const body = $('detailBody');
     body.innerHTML = '';
 
+    // ADMIN KEY PROMPT + STORAGE
+(function ensureAdminKey() {
+  // If key present, nothing to do
+  if (sessionStorage.getItem('adminKey')) return;
+
+  // Use a modal style prompt for nicer UI if you have CSS, fallback to prompt()
+  let key = null;
+  try {
+    // try a nicer custom modal if you have one, else fallback
+    key = prompt('Enter Admin Key to access admin panel:');
+  } catch (e) {
+    key = null;
+  }
+
+  if (!key) {
+    alert('Admin key required to access this page.');
+    // optionally redirect away
+    // location.href = '/';
+    return;
+  }
+  sessionStorage.setItem('adminKey', key);
+})();
+
+
     // full details layout (show full sensitive fields to admin)
     const rows = [];
     rows.push({k:'Full name', v:app.userName || '—'});
