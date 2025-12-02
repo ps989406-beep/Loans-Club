@@ -1,18 +1,15 @@
 // api/admin.js
-// Serverless admin endpoint that updates an application status/comment by
-// reading and writing data.json via the GitHub Contents API.
-//
+// Admin endpoint — now protected by ADMIN_KEY header (x-admin-key).
 // Requires env:
-//   GITHUB_TOKEN - Personal access token with repo/content write permissions
-//
-// Adjust OWNER/REPO/BRANCH/FILE_PATH if your repo differs.
+//   GITHUB_TOKEN  - token with repo contents write permission
+//   ADMIN_KEY     - secret key required in x-admin-key header
 
 const fetch = global.fetch || require('node-fetch');
 
 const OWNER = 'ps989406-beep';
 const REPO = 'Loans-Club';
 const FILE_PATH = 'data.json';
-const BRANCH = 'main'; // change if your default branch is different
+const BRANCH = 'main';
 
 function jsonResponse(res, status, payload) {
   res.statusCode = status;
@@ -21,7 +18,20 @@ function jsonResponse(res, status, payload) {
 }
 
 module.exports = async (req, res) => {
+  // Only POST allowed
   if (req.method !== 'POST') return jsonResponse(res, 405, { error: 'Method not allowed' });
+
+  // Basic admin key check
+  const serverKey = process.env.ADMIN_KEY;
+  if (!serverKey) {
+    console.error('ADMIN_KEY not set on server');
+    return jsonResponse(res, 500, { error: 'Server misconfiguration: ADMIN_KEY missing' });
+  }
+  const incomingKey = (req.headers['x-admin-key'] || req.headers['X-Admin-Key'] || '').toString();
+
+  if (!incomingKey || incomingKey !== serverKey) {
+    return jsonResponse(res, 401, { error: 'Unauthorized: invalid admin key' });
+  }
 
   const token = process.env.GITHUB_TOKEN;
   if (!token) return jsonResponse(res, 500, { error: 'GITHUB_TOKEN not set on server' });
@@ -52,7 +62,6 @@ module.exports = async (req, res) => {
         const content = Buffer.from(info.content, info.encoding).toString('utf8');
         try { data = JSON.parse(content); } catch (e) { data = { users: [], applications: [] }; }
       } else if (getResp.status === 404) {
-        // file doesn't exist
         return jsonResponse(res, 500, { error: 'data.json not found in repository' });
       } else {
         const txt = await getResp.text();
@@ -71,7 +80,6 @@ module.exports = async (req, res) => {
       if (status === 'rejected') data.applications[idx].rejectedAt = new Date().toISOString();
       if (status === 'hold') data.applications[idx].holdAt = new Date().toISOString();
 
-      // optional: maintain audit log array on the application
       data.applications[idx].adminHistory = data.applications[idx].adminHistory || [];
       data.applications[idx].adminHistory.push({
         action: status,
@@ -104,7 +112,6 @@ module.exports = async (req, res) => {
         return jsonResponse(res, 500, { error: `GitHub write failed: ${putResp.status} ${txt}` });
       }
 
-      // 4) return updated data to client
       return jsonResponse(res, 200, data);
 
     } catch (err) {
