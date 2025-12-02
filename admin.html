@@ -30,6 +30,8 @@
     .muted-small{color:var(--text-muted);font-size:13px}
     .comment-box{width:100%;height:90px;padding:10px;border-radius:8px;background:#07101b;border:1px solid rgba(255,255,255,0.06);color:var(--text-light)}
     .small-note{font-size:12px;color:var(--text-muted);margin-top:8px}
+    /* small sign-out admin button */
+    #adminKeyLogout { background: transparent; border:1px solid rgba(255,255,255,0.08); color:var(--text-light); padding:8px 10px; border-radius:10px; cursor:pointer; font-weight:700; }
   </style>
 </head>
 <body>
@@ -52,6 +54,7 @@
           <input id="searchQ" placeholder="Search name or email or id" class="search" />
         </div>
         <button id="refreshBtn" class="btn btn-outline">Refresh</button>
+        <button id="adminKeyLogout" title="Clear stored admin key">Sign out (admin)</button>
       </div>
     </div>
 
@@ -123,6 +126,39 @@
     alert(msg);
   }
 
+  /* ---------- ADMIN KEY HANDLING ---------- */
+  function ensureAdminKeySync() {
+    // If already present in sessionStorage, nothing to do
+    if (sessionStorage.getItem('adminKey')) return true;
+
+    // Prompt user for key (simple, immediate)
+    let key = null;
+    try { key = prompt('Enter Admin Key to access admin panel:'); } catch (e) { key = null; }
+
+    if (!key) {
+      alert('Admin key required to access this page. You will be redirected.');
+      // Optional: redirect to home
+      location.href = '/';
+      return false;
+    }
+    sessionStorage.setItem('adminKey', key);
+    return true;
+  }
+
+  // Clear admin key UI control
+  const adminKeyLogoutBtn = document.getElementById('adminKeyLogout');
+  if (adminKeyLogoutBtn) {
+    adminKeyLogoutBtn.addEventListener('click', () => {
+      sessionStorage.removeItem('adminKey');
+      alert('Admin key cleared. You will be redirected to login.');
+      location.reload();
+    });
+  }
+
+  // Ensure key before doing anything sensitive
+  if (!ensureAdminKeySync()) return;
+
+  /* ---------- DATA LOADING ---------- */
   async function loadData(){
     try {
       const r = await fetch(loadUrl, {cache:'no-store'});
@@ -132,7 +168,7 @@
       renderList();
     } catch (err) {
       console.error(err);
-      toast('Could not load data.json — check server logs.');
+      toast('Could not load data.json — check server logs or network. If you see a 401, ensure your ADMIN_KEY is correct on the server and in this prompt.');
     }
   }
 
@@ -223,30 +259,6 @@
     const body = $('detailBody');
     body.innerHTML = '';
 
-    // ADMIN KEY PROMPT + STORAGE
-(function ensureAdminKey() {
-  // If key present, nothing to do
-  if (sessionStorage.getItem('adminKey')) return;
-
-  // Use a modal style prompt for nicer UI if you have CSS, fallback to prompt()
-  let key = null;
-  try {
-    // try a nicer custom modal if you have one, else fallback
-    key = prompt('Enter Admin Key to access admin panel:');
-  } catch (e) {
-    key = null;
-  }
-
-  if (!key) {
-    alert('Admin key required to access this page.');
-    // optionally redirect away
-    // location.href = '/';
-    return;
-  }
-  sessionStorage.setItem('adminKey', key);
-})();
-
-
     // full details layout (show full sensitive fields to admin)
     const rows = [];
     rows.push({k:'Full name', v:app.userName || '—'});
@@ -287,21 +299,45 @@
     hide($('detailModal'));
   }
 
+  /* ---------- APPLY ADMIN ACTION (sends x-admin-key header) ---------- */
   async function applyAdminAction(){
     if (!selectedApp) return;
     const newStatus = $('adminAction').value;
     const comment = $('adminComment').value.trim();
-    // send to server
+
+    const adminKey = sessionStorage.getItem('adminKey') || '';
+    if (!adminKey) {
+      alert('Admin key missing — please sign in again.');
+      location.reload();
+      return;
+    }
+
+    const payload = { action: 'updateStatus', id: selectedApp.id, status: newStatus, adminComment: comment };
+
     try {
       const res = await fetch(adminUrl, {
         method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ action: 'updateStatus', id: selectedApp.id, status: newStatus, adminComment: comment })
+        headers: {
+          'Content-Type':'application/json',
+          'x-admin-key': adminKey
+        },
+        body: JSON.stringify(payload)
       });
+
+      if (res.status === 401) {
+        // unauthorized — clear stored key and prompt again
+        sessionStorage.removeItem('adminKey');
+        alert('Invalid admin key (401). Please enter the correct key.');
+        // re-run key prompt flow
+        if (!ensureAdminKeySync()) return;
+        return;
+      }
+
       if (!res.ok) {
         const t = await res.text();
         throw new Error(t || 'admin update failed');
       }
+
       const json = await res.json();
       // update local apps and refresh list
       apps = json.applications || apps;
@@ -310,7 +346,7 @@
       renderList();
     } catch (err) {
       console.error(err);
-      toast('Could not update — check server logs');
+      toast('Could not update — check server logs or network. See console for details.');
     }
   }
 
@@ -321,7 +357,7 @@
   $('closeDetail').addEventListener('click', closeDetail);
   $('applyAction').addEventListener('click', applyAdminAction);
 
-  // initial load
+  // initial load (ensure key present then fetch)
   await loadData();
 })();
 </script>
