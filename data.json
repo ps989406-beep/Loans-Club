@@ -10,6 +10,36 @@
       "name": "Admin",
       "role": "admin",
       "password": "Admin@123"
+    },
+    {
+      "id": "u-1764680011889",
+      "email": "test@mail.us",
+      "name": "Test",
+      "password": "no",
+      "role": "user"
+    }
+  ],
+  "applications": [
+    {
+      "id": "app-1764680011888-e2xo",
+      "userEmail": "test@mail.us",
+      "userName": "Test",
+      "phone": "1234567890",
+      "address": "my address",
+      "zip": "12345",
+      "requested": 5000,
+      "term": 12,
+      "purpose": "Time Pass",
+      "income": 0,
+      "bank": {
+        "accountNumber": "1234567890",
+        "routingNumber": "1234567890",
+        "bankName": "My Bank",
+        "accountType": "Checking"
+      },
+      "references": "Me",
+      "createdAt": "2025-12-02T12:53:31.888Z",
+      "status": "pending"
     }
   ]
 }
