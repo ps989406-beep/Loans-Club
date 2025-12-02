@@ -376,3 +376,42 @@ body{
   height: 100%;
   object-fit: cover;
 }
+/* ===== Footer center links & small layout tweaks ===== */
+.footer-center-links{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  z-index:45;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+/* centered link buttons (Terms/Privacy) */
+.link-btn{
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.08);
+  padding:8px 12px;
+  border-radius:10px;
+  font-weight:800;
+  color:var(--text-light);
+  cursor:pointer;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+}
+.link-btn:hover{
+  transform:translateY(-3px);
+  transition:all .14s ease;
+  border-color: rgba(255,255,255,0.14);
+}
+
+/* ensure footer spacing */
+.hero-wrap, #loggedInView, .card { padding-bottom: 100px; }
+
+/* ensure footer layout on narrow screens */
+@media(max-width:640px){
+  .site-footer-inner{ flex-direction:column; align-items:flex-start; gap:10px; padding:12px; }
+  .footer-contact{ order:2; width:100%; display:flex; gap:8px; }
+  .footer-center-links{ order:3; width:100%; justify-content:flex-start; }
+  .footer-left{ order:1; }
+}
