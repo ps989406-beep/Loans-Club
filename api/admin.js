@@ -1,5 +1,5 @@
 // api/admin.js
-// Admin endpoint — now protected by ADMIN_KEY header (x-admin-key).
+// Admin endpoint — protected by ADMIN_KEY header (x-admin-key).
 // Requires env:
 //   GITHUB_TOKEN  - token with repo contents write permission
 //   ADMIN_KEY     - secret key required in x-admin-key header
@@ -21,7 +21,7 @@ module.exports = async (req, res) => {
   // Only POST allowed
   if (req.method !== 'POST') return jsonResponse(res, 405, { error: 'Method not allowed' });
 
-  // Basic admin key check
+  // Basic admin key check (must exist on server)
   const serverKey = process.env.ADMIN_KEY;
   if (!serverKey) {
     console.error('ADMIN_KEY not set on server');
@@ -36,14 +36,23 @@ module.exports = async (req, res) => {
   const token = process.env.GITHUB_TOKEN;
   if (!token) return jsonResponse(res, 500, { error: 'GITHUB_TOKEN not set on server' });
 
+  // parse request body
   let body = '';
   req.on('data', c => body += c);
   req.on('end', async () => {
     try {
       const payload = body ? JSON.parse(body) : {};
+
+      // VERIFY action: key is valid (we already checked header) -> return OK with basic info
+      if (payload && payload.action === 'verify') {
+        return jsonResponse(res, 200, { ok: true, message: 'admin key valid' });
+      }
+
+      // Expecting updateStatus for actual admin changes
       if (!payload || payload.action !== 'updateStatus') {
         return jsonResponse(res, 400, { error: 'Invalid action. Use { action: "updateStatus", id, status, adminComment }' });
       }
+
       const { id, status, adminComment } = payload;
       if (!id || !status) return jsonResponse(res, 400, { error: 'Missing id or status' });
 
