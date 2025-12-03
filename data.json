@@ -67,7 +67,17 @@
       },
       "references": "sdfghnm",
       "createdAt": "2025-12-03T07:38:37.465Z",
-      "status": "pending"
+      "status": "hold",
+      "adminComment": "on hold because of lack of info. contact support 345678345678",
+      "adminUpdatedAt": "2025-12-03T07:45:48.026Z",
+      "holdAt": "2025-12-03T07:45:48.026Z",
+      "adminHistory": [
+        {
+          "action": "hold",
+          "comment": "on hold because of lack of info. contact support 345678345678",
+          "at": "2025-12-03T07:45:48.026Z"
+        }
+      ]
     }
   ]
 }
