@@ -397,7 +397,8 @@
   $('closeDetail').addEventListener('click', closeDetail);
   $('applyAction').addEventListener('click', applyAdminAction);
 
-  // initial load (ensure key present then fetch)
+    // Ensure admin key is verified before loading data
+  if (!await ensureAdminKeyVerified()) return;
   await loadData();
 })();
 </script>
