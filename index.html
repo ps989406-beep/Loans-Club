@@ -645,22 +645,47 @@
 
     // update top actions depending on login state
     function updateTopActions(){
-      const top = $('topActions');
-      top.innerHTML = '';
-      if (currentUser){
-        const span = document.createElement('div'); span.style.color = 'var(--text-light)'; span.style.fontWeight='700'; span.style.marginRight='12px';
-        span.textContent = currentUser.name || currentUser.email;
-        const newApp = document.createElement('button'); newApp.className='btn btn-primary'; newApp.id='newAppTop'; newApp.textContent='New Application';
-        const logout = document.createElement('button'); logout.className='btn btn-ghost'; logout.id='logoutTop'; logout.textContent='Logout';
-        top.appendChild(span); top.appendChild(newApp); top.appendChild(logout);
-        newApp.addEventListener('click', () => openWizardForNewApp());
-        logout.addEventListener('click', () => doLogout());
-      } else {
-        const btn = document.createElement('button'); btn.id='loginOpenHeader'; btn.className='btn btn-ghost'; btn.textContent='Login / Signup';
-        top.appendChild(btn);
-        btn.addEventListener('click', () => show($('loginOverlay')));
-      }
-    }
+  const top = $('topActions');
+  top.innerHTML = '';
+
+  if (currentUser){
+    // show user name, "My Applications" and Logout (keeps marketing visible)
+    const span = document.createElement('div');
+    span.style.color = 'var(--text-light)';
+    span.style.fontWeight = '700';
+    span.style.marginRight = '12px';
+    span.textContent = currentUser.name || currentUser.email;
+
+    const myAppsBtn = document.createElement('button');
+    myAppsBtn.className = 'btn btn-primary';
+    myAppsBtn.id = 'myAppsTop';
+    myAppsBtn.textContent = 'My Applications';
+
+    const logout = document.createElement('button');
+    logout.className = 'btn btn-ghost';
+    logout.id = 'logoutTop';
+    logout.textContent = 'Logout';
+
+    top.appendChild(span);
+    top.appendChild(myAppsBtn);
+    top.appendChild(logout);
+
+    // wire events
+    myAppsBtn.addEventListener('click', () => {
+      // open the compact logged-in view (user requested)
+      showLoggedInView();
+    });
+    logout.addEventListener('click', () => doLogout());
+  } else {
+    // not logged in -> show login/signup
+    const btn = document.createElement('button');
+    btn.id = 'loginOpenHeader';
+    btn.className = 'btn btn-ghost';
+    btn.textContent = 'Login / Signup';
+    top.appendChild(btn);
+    btn.addEventListener('click', () => show($('loginOverlay')));
+  }
+}
 
     // show marketing or logged-in view
     function showLoggedInView(){ hide($('marketing')); show($('loggedInView')); updateTopActions(); renderMyApps(); }
@@ -926,7 +951,7 @@ document.body.addEventListener('click', (e) => {
       currentUser = user;
       saveUserToLocal(user);
       updateTopActions();
-      showLoggedInView();
+      showMarketingView();
       hide($('loginOverlay'));
       toast('Logged in — welcome back!');
     });
@@ -994,7 +1019,7 @@ function updateCalcPreview(){
       }
 
       updateTopActions();
-      if (currentUser) showLoggedInView(); else showMarketingView();
+showMarketingView(); // always show marketing by default; logged-in users get a "My Applications" button
 
       wire();
       updateCalcPreview();
