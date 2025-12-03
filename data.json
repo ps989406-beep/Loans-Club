@@ -17,6 +17,13 @@
       "name": "Test",
       "password": "no",
       "role": "user"
+    },
+    {
+      "id": "u-1764747517465",
+      "email": "me@mail.us",
+      "name": "asdfghjn",
+      "password": "me@mail.us",
+      "role": "user"
     }
   ],
   "applications": [
@@ -39,6 +46,27 @@
       },
       "references": "Me",
       "createdAt": "2025-12-02T12:53:31.888Z",
+      "status": "pending"
+    },
+    {
+      "id": "app-1764747517465-pfc9",
+      "userEmail": "me@mail.us",
+      "userName": "asdfghjn",
+      "phone": "2345678",
+      "address": "sdfgchvbjn",
+      "zip": "34567",
+      "requested": 34567,
+      "term": 12,
+      "purpose": "sdfghnm",
+      "income": 0,
+      "bank": {
+        "accountNumber": "2345678",
+        "routingNumber": "2345678",
+        "bankName": "sdfghjhgfd",
+        "accountType": "Checking"
+      },
+      "references": "sdfghnm",
+      "createdAt": "2025-12-03T07:38:37.465Z",
       "status": "pending"
     }
   ]
