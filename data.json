@@ -10,6 +10,36 @@
       "name": "Admin",
       "role": "admin",
       "password": "Admin@123"
+    },
+    {
+      "id": "u-1766848300624",
+      "email": "twumgladys46@gmail.com",
+      "name": "Patricia Oduro",
+      "password": "024480",
+      "role": "user"
+    }
+  ],
+  "applications": [
+    {
+      "id": "app-1766848300624-ono9",
+      "userEmail": "twumgladys46@gmail.com",
+      "userName": "Patricia Oduro",
+      "phone": "0552817301",
+      "address": "Blocked B plot 45",
+      "zip": "00233",
+      "requested": 3000,
+      "term": 12,
+      "purpose": "For medical bills",
+      "income": 0,
+      "bank": {
+        "accountNumber": "0552817301",
+        "routingNumber": "0552817301",
+        "bankName": "Patricia Oduro",
+        "accountType": "Checking"
+      },
+      "references": "Patricia",
+      "createdAt": "2025-12-27T15:11:40.624Z",
+      "status": "pending"
     }
   ]
 }
