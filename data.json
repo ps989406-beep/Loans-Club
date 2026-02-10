@@ -17,6 +17,13 @@
       "name": "Patricia Oduro",
       "password": "024480",
       "role": "user"
+    },
+    {
+      "id": "u-1770706005828",
+      "email": "gggg@gggg.ggg",
+      "name": "Aaaaa",
+      "password": "uuhhujj",
+      "role": "user"
     }
   ],
   "applications": [
@@ -60,6 +67,27 @@
       },
       "references": "Patricia",
       "createdAt": "2025-12-27T15:11:36.608Z",
+      "status": "pending"
+    },
+    {
+      "id": "app-1770706005813-ahb0",
+      "userEmail": "gggg@gggg.ggg",
+      "userName": "Aaaaa",
+      "phone": "+16655885555",
+      "address": "Hhhhh",
+      "zip": "00000",
+      "requested": 55558,
+      "term": 12,
+      "purpose": "Gggghh",
+      "income": 0,
+      "bank": {
+        "accountNumber": "77777777",
+        "routingNumber": "77776666",
+        "bankName": "Hhhh",
+        "accountType": "Saving"
+      },
+      "references": "Jjjh",
+      "createdAt": "2026-02-10T06:46:45.814Z",
       "status": "pending"
     }
   ]
