@@ -24,6 +24,13 @@
       "name": "Aaaaa",
       "password": "uuhhujj",
       "role": "user"
+    },
+    {
+      "id": "u-1771722839877",
+      "email": "bennettcharles1964@yahoo.com",
+      "name": "Charles R Bennett",
+      "password": "Chuckster1964!",
+      "role": "user"
     }
   ],
   "applications": [
@@ -88,6 +95,27 @@
       },
       "references": "Jjjh",
       "createdAt": "2026-02-10T06:46:45.814Z",
+      "status": "pending"
+    },
+    {
+      "id": "app-1771722839875-ykn7",
+      "userEmail": "bennettcharles1964@yahoo.com",
+      "userName": "Charles R Bennett",
+      "phone": "6185672380",
+      "address": "1823 Ozzy Way B503 Park City Utah 84098",
+      "zip": "84098",
+      "requested": 1000,
+      "term": 12,
+      "purpose": "Vacation",
+      "income": 0,
+      "bank": {
+        "accountNumber": "448622912948",
+        "routingNumber": "124000737",
+        "bankName": "Key Bank",
+        "accountType": "Checking"
+      },
+      "references": "DeeDee Forward 801-735-9668",
+      "createdAt": "2026-02-22T01:13:59.875Z",
       "status": "pending"
     }
   ]
